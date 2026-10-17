@@ -36,3 +36,5 @@ open "$HOME/Library/Caches/LunaGuardianBuild/露娜电脑管家.app"
 仓库动态提醒每 15 分钟检查公开 GitHub API，在桌宠气泡中显示 Star 数净增加、新 Issue/PR 和留言。初次检查仅建立基线，不补报历史。详情见 [配置与隐私](docs/CONFIGURATION.md)。
 
 读书字幕可直接点开对应手记并留言；大小只通过菜单调整，不响应滚轮或捏合缩放。公开前检查见 [SECURITY](docs/SECURITY.md)。
+
+读书分享的字幕 120 秒内未点击时收成小书本未读提示，进入手记后消失；重启保留未读状态。每篇手记显示实际联网阅读时间。

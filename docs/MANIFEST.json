@@ -1,13 +1,13 @@
 [
   {
     "path": ".gitignore",
-    "sha256": "5a24fe3f3bf60c265bbfea34e69598edbde9fbe1042f944196333b553599ae8e",
-    "bytes": 572
+    "sha256": "188f9f727e4be7ed3e536c8532dada4240299a2eafb832f747b44ffbc1e09fac",
+    "bytes": 592
   },
   {
     "path": "README.md",
-    "sha256": "b22d7d9b23255d9ab7762a0395010a0adf18248f363b5fcabf1f67269a59b464",
-    "bytes": 2975
+    "sha256": "15cb2e88544cff2a16cfedceb63da0aea421447404f62b422f4588a791630d60",
+    "bytes": 3147
   },
   {
     "path": "assets/actions/daily.png",
@@ -91,13 +91,13 @@
   },
   {
     "path": "build.py",
-    "sha256": "eb77190dce085dac7845a443fe0301be6e53ee17a7038fb02701ce6c3757d959",
+    "sha256": "572ce14914fd08ff44c48845090e083c476d159307a597aa76a7a64cb83e31dd",
     "bytes": 2392
   },
   {
     "path": "docs/CONFIGURATION.md",
-    "sha256": "3b8aab81e8a4d7528e975ff0f65425f6af26b6af781db6215a3e572e3fe0f324",
-    "bytes": 4941
+    "sha256": "17ed34520f109f20e9ce8a08a973f7a5ab6d0334b4ff011f883080a5f4047e29",
+    "bytes": 5228
   },
   {
     "path": "docs/REFERENCES.md",
@@ -156,18 +156,18 @@
   },
   {
     "path": "src/Life.swift",
-    "sha256": "3b3d17f20b179854eaa9761c8d9bc0c6fc0a460948125ad3df556a6392191e10",
-    "bytes": 15486
+    "sha256": "e4cffa6565edeeb77640671992053b32a4a8de22bc96897f36da27b63fcf3025",
+    "bytes": 15563
   },
   {
     "path": "src/Notebook.swift",
-    "sha256": "94988b0b19c5e39f23b1ff326a0b617cb0ac3c236751317ca0b5cb444b5f2be0",
-    "bytes": 8253
+    "sha256": "ae202497b66e86a8871c7d4735f7ad15c86bc47c5e10eb2e3749e658cdd0d28e",
+    "bytes": 8566
   },
   {
     "path": "src/Scene.swift",
-    "sha256": "263fe859d31ba35ec31c3293e64a6861c81fbc5edcc72bdfa099bd438bccc621",
-    "bytes": 5167
+    "sha256": "903c0638208f8bfb4dc721c5f324bee1e9af41fd403530f9dd1c20d1ca2f4e70",
+    "bytes": 5168
   },
   {
     "path": "src/backend.py",
@@ -191,8 +191,8 @@
   },
   {
     "path": "src/main.swift",
-    "sha256": "2d65f1b658a84723042e943349041eac34b21d49fdef5640b15f0435013e175f",
-    "bytes": 44848
+    "sha256": "387c2dc8a3685185e54e08927cdf23f21f864ca8fdd87c4e3fb371ead6e6a2f0",
+    "bytes": 46110
   },
   {
     "path": "src/maintenance.py",

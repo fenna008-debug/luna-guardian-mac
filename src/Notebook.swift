@@ -31,6 +31,7 @@ final class LunaNotebook:NSWindowController {
         add.title=section==0 ? "给露娜留言":"添加";edit.placeholderString=section==0 ? "这段书或她的感想，你怎么看？":"写下想记住的事，或添加待办任务"
         remove.title=section==3 ? "清空记录":"删除"
         if section==0 {
+            if window?.isVisible==true{guardian?.petView.clearReadingUnread()}
             let data=try? Data(contentsOf:support.appendingPathComponent("reading-log.json"));rows=(data.flatMap{try? JSONSerialization.jsonObject(with:$0)} as? [[String:Any]]) ?? []
             hint.stringValue="只记录实际取得的节选；感想与原文分开显示。点击标题可查看此前的阅读。";fill()
         } else if section==3 {
@@ -44,7 +45,9 @@ final class LunaNotebook:NSWindowController {
     @objc func select(){
         guard rows.indices.contains(picker.indexOfSelectedItem) else{body.string=tabs.selectedSegment==0 ? "她还没有留下阅读手记。取得正文后，这里会出现出处和感想。":"暂时没有记录。";edit.stringValue="";return}
         let r=rows[picker.indexOfSelectedItem]
-        if tabs.selectedSegment==0 {body.string=(r["title"] as? String ?? "")+"\n"+(r["scope"] as? String ?? "")+"\n\n露娜的感想\n"+(r["reflection"] as? String ?? "未生成")+"\n\n原文节选\n"+(r["quote"] as? String ?? "")+"\n\n来源\n"+(r["url"] as? String ?? "")}
+        if tabs.selectedSegment==0 {
+            let stamp=(r["time"] as? Double).map{DateFormatter.localizedString(from:Date(timeIntervalSince1970:$0),dateStyle:.long,timeStyle:.medium)} ?? "未记录"
+            body.string="联网阅读时间："+stamp+"（本机时区）\n\n"+(r["title"] as? String ?? "")+"\n"+(r["scope"] as? String ?? "")+"\n\n露娜的感想\n"+(r["reflection"] as? String ?? "未生成")+"\n\n原文节选\n"+(r["quote"] as? String ?? "")+"\n\n来源\n"+(r["url"] as? String ?? "")}
         else if tabs.selectedSegment==3 {body.string=(r["tool"] as? String ?? "工具")+"\n结果："+(r["outcome"] as? String ?? "未知")+"\n耗时：\(r["seconds"] ?? 0) 秒\n时间："+DateFormatter.localizedString(from:Date(timeIntervalSince1970:r["at"] as? Double ?? 0),dateStyle:.medium,timeStyle:.medium)}
         else {edit.stringValue=r["text"] as? String ?? "";body.string=edit.stringValue;let values=["pending","in_progress","done"];status.selectItem(at:values.firstIndex(of:r["status"] as? String ?? "pending") ?? 0)}
         if tabs.selectedSegment==0 {
