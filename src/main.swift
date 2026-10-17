@@ -26,7 +26,7 @@ final class PetView: NSView {
     let character = CALayer(), prop = CATextLayer(), bubble = CATextLayer(),scene=CALayer()
     let readingSubtitle=NSButton(title:"",target:nil,action:nil)
     var readingHash:String?
-    let unreadBadge=NSButton(title:"📖",target:nil,action:nil)
+    let unreadBadge=NSButton(title:"📖 !",target:nil,action:nil)
     var unreadReadingHash:String?
     var sceneKind=""
     var states:[String:[CGImage]] = [:]
@@ -46,7 +46,7 @@ final class PetView: NSView {
             for i in 0..<16 {let x=CGFloat((i % 8)*192);let y=CGFloat((9+i/8)*208);if let image=sheet.cropping(to:CGRect(x:x,y:y,width:192,height:208)){lookFrames.append(image)}}
         }
         readingSubtitle.isBordered=false;readingSubtitle.isTransparent=true;readingSubtitle.isHidden=true;readingSubtitle.target=self;readingSubtitle.action=#selector(openNotebook);addSubview(readingSubtitle)
-        unreadBadge.isBordered=false;unreadBadge.font = .systemFont(ofSize:19);unreadBadge.target=self;unreadBadge.action=#selector(openUnread);unreadBadge.toolTip="有未读的读书感想，点击查看";unreadBadge.setAccessibilityLabel("未读读书感想，点击后清除提醒");addSubview(unreadBadge)
+        unreadBadge.isBordered=false;unreadBadge.font = .boldSystemFont(ofSize:19);unreadBadge.contentTintColor = .systemOrange;unreadBadge.target=self;unreadBadge.action=#selector(openUnread);unreadBadge.toolTip="有未读的读书感想，点击查看";unreadBadge.setAccessibilityLabel("未读读书感想，点击后清除提醒");addSubview(unreadBadge)
         unreadReadingHash=readJSON("reading-unread.json")["hash"] as? String;unreadBadge.isHidden=unreadReadingHash==nil
         loadActions();setState("idle")
         setAccessibilityElement(true);setAccessibilityLabel("露娜桌宠，点击聊天，拖动移动")
@@ -201,7 +201,7 @@ final class Guardian:NSObject,NSApplicationDelegate,CLLocationManagerDelegate,AV
         petView.character.frame=CGRect(x:(w-petSize)/2,y:4,width:petSize,height:petSize*208/192)
         petView.bubble.frame=CGRect(x:8,y:h-82,width:w-16,height:76)
         petView.readingSubtitle.frame=petView.bubble.frame
-        petView.unreadBadge.frame=NSRect(x:w-35,y:petSize*0.35,width:28,height:28)
+        petView.unreadBadge.frame=NSRect(x:w-56,y:petSize*0.35,width:50,height:32)
         petView.prop.frame=CGRect(x:w/2+petSize*0.17,y:petSize*0.22,width:65,height:70)
         CATransaction.commit();petView.refreshScene()
         if companion.isViewLoaded{companion.slider.doubleValue=Double(petSize)}

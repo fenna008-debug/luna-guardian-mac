@@ -91,7 +91,7 @@
   },
   {
     "path": "build.py",
-    "sha256": "479e20bf35dca6e6cd97844f136646a3e5ce52eef92c6597236f84306276c631",
+    "sha256": "f3bf6be7ff03c13749c162f58296ce94777f39b7993fd292eb7dad5f07b9a90d",
     "bytes": 2392
   },
   {
@@ -126,28 +126,53 @@
   },
   {
     "path": "integrations/astrbot_luna/README.md",
-    "sha256": "533e07e7c1a69d462980b4c601f1ea62978c4bb6368321459db9b3e88044143d",
-    "bytes": 2202
+    "sha256": "be1d79b06a5f6f9835e66ae9bd46260b9a548e687c669790cb8ae5f03ffd5d26",
+    "bytes": 3576
   },
   {
     "path": "integrations/astrbot_luna/main.py",
-    "sha256": "559899c9f26dc4a39dbd7947ff8eceb6d185ecaadb8546f1d8a85db62ddc0e78",
-    "bytes": 3535
+    "sha256": "0abfee43ab8f4194e11980cf7a3ffca6eabe5fb7c71807daa21bc0357173660e",
+    "bytes": 9454
+  },
+  {
+    "path": "integrations/astrbot_luna/media.py",
+    "sha256": "f6845e6c6f4ce1ee78fe4e9ddee2aa5c0c1ef16a41147871452d370df99c0ce8",
+    "bytes": 2472
+  },
+  {
+    "path": "integrations/astrbot_luna/media_worker.py",
+    "sha256": "541ec87f28c450ab09af3079269a7f71f3fe47f1acf8f5d048d58ab308dd1c08",
+    "bytes": 6162
   },
   {
     "path": "integrations/astrbot_luna/metadata.yaml",
-    "sha256": "dc0240d4ac97a9a6e471323ed348717002a98844f2b94e050b712ae6d5d7c1b0",
-    "bytes": 250
+    "sha256": "37870ff3d1eb66a97810e19b655163830ccdaaaea7bca61322cf6562388a88aa",
+    "bytes": 219
+  },
+  {
+    "path": "integrations/astrbot_luna/qq_voice.py",
+    "sha256": "574043aa94d3a085f5da187f2ebb40cc990e43c86b19930df177b39ca9e431cc",
+    "bytes": 2958
+  },
+  {
+    "path": "integrations/astrbot_luna/requirements.txt",
+    "sha256": "9695a23827664113901e48eacce4329709580fa3cdfc6ab5f109d9b3107c9f2d",
+    "bytes": 87
   },
   {
     "path": "integrations/astrbot_luna/test_bridge.py",
-    "sha256": "93d6be11314984addf9ac4da560ab567ab6bba397d91c8693152c7bf86db5035",
-    "bytes": 4346
+    "sha256": "e2baeebee2a255d11bd3b5337b677a3d7ad915587d5240f8f2344d66d72904cc",
+    "bytes": 4860
+  },
+  {
+    "path": "integrations/astrbot_luna/test_media.py",
+    "sha256": "6d10df2ba2d37021c57c2df705ad15e208326b20e87b1dc84eb4b1bed1281a30",
+    "bytes": 3850
   },
   {
     "path": "integrations/astrbot_luna/worker.py",
-    "sha256": "5fbd1ba984550d962d5588a4fadac28e57fddf8f8be5b7ee3aafe6ef20e51833",
-    "bytes": 2825
+    "sha256": "a6472df4142bc155ee597a78a19835798839b751bc7c40ffa7828edbfbdcfc77",
+    "bytes": 3258
   },
   {
     "path": "src/Bubble.swift",
@@ -186,8 +211,8 @@
   },
   {
     "path": "src/Notebook.swift",
-    "sha256": "11e08e8ec3fc2ab03a7805f9e73c6b426d7468abdc17fb55a9299343bbfe5667",
-    "bytes": 9817
+    "sha256": "9884a704ef8e564c631ae0f1e2d1079b747c21a8dfe1b59eb533edabb6d8b5ed",
+    "bytes": 9845
   },
   {
     "path": "src/Scene.swift",
@@ -216,8 +241,8 @@
   },
   {
     "path": "src/main.swift",
-    "sha256": "82847f52bb40adddf75605a131dc2ecc7db14f4977964e897ada5416fbb862c0",
-    "bytes": 46274
+    "sha256": "3c864cfafb7440612d2cb109efc098768792d5153caa19008a9685ff658fc4a9",
+    "bytes": 46325
   },
   {
     "path": "src/maintenance.py",

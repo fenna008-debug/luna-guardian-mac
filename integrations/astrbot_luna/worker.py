@@ -10,6 +10,19 @@ def respond(message):
     resources = Path("/Applications/露娜电脑管家.app/Contents/Resources")
     sys.path.insert(0, str(resources))
     import backend
+
+    original_model_read = backend.read
+
+    def bounded_read(name, default):
+        value = original_model_read(name, default)
+        if name == "model.json":
+            value = {
+                **value,
+                "extra_body": {**value.get("extra_body", {}), "max_tokens": 128},
+            }
+        return value
+
+    backend.read = bounded_read
     from notebook import manage, remember_region
 
     region = remember_region(backend.BASE, message)
@@ -30,20 +43,20 @@ def respond(message):
         message,
         re.I,
     ):
-        return "微信入口现在支持聊天、记忆、待办和天气；操作电脑的事情请回到 Mac 桌宠交给我。"
+        return "远程入口现在支持聊天、记忆、待办和天气；操作电脑的事情请回到 Mac 桌宠交给我。"
     if re.search(r"天气|会下雨|气温|带伞", message):
         data = backend.weather()
         current = data["current"]
         return f"{data['city']}，{current['time']}：气温 {current['temperature_2m']}°C，体感 {current['apparent_temperature']}°C。来源：https://open-meteo.com/"
-    # Keep the WeChat context separate from simultaneous desktop writes while
+    # Keep the Remote context separate from simultaneous desktop writes while
     # sharing the same long-term SQLite notebook and model credentials.
     original_read, original_save = backend.read, backend.save
     names = {"chat.json", "context-window.json"}
     backend.read = lambda name, default: original_read(
-        "wechat-" + name if name in names else name, default
+        "remote-" + name if name in names else name, default
     )
     backend.save = lambda name, data: original_save(
-        "wechat-" + name if name in names else name, data
+        "remote-" + name if name in names else name, data
     )
     return backend.chat(message, timeout=45)["answer"]
 
@@ -56,10 +69,13 @@ if __name__ == "__main__":
             raise ValueError("invalid message length")
         print(json.dumps({"answer": respond(message)}, ensure_ascii=False))
     except Exception:
-        # Do not expose provider URLs, credentials or local paths to WeChat.
+        # Do not expose provider URLs, credentials or local paths to Remote.
         print(
             json.dumps(
-                {"answer": "暂时无法完成这次请求，请稍后再试。没有自动转交 Codex。"},
+                {
+                    "answer": "暂时无法完成这次请求，请稍后再试。没有自动转交 Codex。",
+                    "error": True,
+                },
                 ensure_ascii=False,
             )
         )

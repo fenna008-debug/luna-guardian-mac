@@ -14,7 +14,7 @@ final class LunaNotebook:NSWindowController {
         let w=NSPanel(contentRect:NSRect(x:0,y:0,width:600,height:580),styleMask:[.titled,.closable,.miniaturizable,.resizable],backing:.buffered,defer:false)
         w.title="露娜的手记";w.isReleasedWhenClosed=false;w.backgroundColor=NSColor(calibratedRed:0.97,green:0.95,blue:0.91,alpha:1);w.appearance=NSAppearance(named:.aqua)
         super.init(window:w);let root=w.contentView!
-        tabs.frame=NSRect(x:24,y:526,width:552,height:30);tabs.target=self;tabs.action=#selector(reload);root.addSubview(tabs)
+        tabs.frame=NSRect(x:24,y:526,width:552,height:30);tabs.target=self;tabs.action=#selector(selectTab);root.addSubview(tabs)
         picker.frame=NSRect(x:24,y:478,width:552,height:30);picker.target=self;picker.action=#selector(select);root.addSubview(picker)
         let scroll=NSScrollView(frame:NSRect(x:24,y:164,width:552,height:298));scroll.hasVerticalScroller=true;scroll.borderType = .noBorder;scroll.drawsBackground=false
         body.isEditable=false;body.isSelectable=true;body.isRichText=false;body.font = .systemFont(ofSize:15);body.textColor=NSColor(calibratedWhite:0.20,alpha:1);body.backgroundColor=w.backgroundColor;body.textContainerInset=NSSize(width:16,height:18);body.isVerticallyResizable=true;body.isHorizontallyResizable=false;body.autoresizingMask = [.width];body.textContainer?.widthTracksTextView=true;body.frame=NSRect(x:0,y:0,width:552,height:298);scroll.documentView=body;root.addSubview(scroll)
@@ -26,13 +26,13 @@ final class LunaNotebook:NSWindowController {
     }
     required init?(coder:NSCoder){fatalError()}
     func show(_ section:Int=0){translationAttempts.removeAll();tabs.selectedSegment=section;window?.makeKeyAndOrderFront(nil);reload();NSApp.activate(ignoringOtherApps:true)}
+    @objc func selectTab(){if tabs.selectedSegment==0{guardian?.petView.clearReadingUnread()};reload()}
     @objc func reload(){
         let section=tabs.selectedSegment
         edit.isHidden=section==3;status.isHidden=section != 2;add.isHidden=section==3;change.isHidden=section==0 || section==3;remove.isHidden=section==0;source.isHidden=section != 0
         add.title=section==0 ? "给露娜留言":"添加";edit.placeholderString=section==0 ? "这段书或她的感想，你怎么看？":"写下想记住的事，或添加待办任务"
         remove.title=section==3 ? "清空记录":"删除"
         if section==0 {
-            if window?.isVisible==true{guardian?.petView.clearReadingUnread()}
             let data=try? Data(contentsOf:support.appendingPathComponent("reading-log.json"));rows=(data.flatMap{try? JSONSerialization.jsonObject(with:$0)} as? [[String:Any]]) ?? []
             hint.stringValue="只记录实际取得的节选；感想与原文分开显示。点击标题可查看此前的阅读。";fill()
         } else if section==3 {

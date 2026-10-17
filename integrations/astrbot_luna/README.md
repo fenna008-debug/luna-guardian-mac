@@ -1,17 +1,29 @@
 # Mac Luna AstrBot bridge
 
-Tested with AstrBot v4.29.1 on Apple Silicon. This optional plugin connects the personal WeChat adapter (`weixin_oc`) to an installed `/Applications/露娜电脑管家.app`. It uses that app's local LLM settings and persona; no model API credential is copied into the plugin.
+Tested with AstrBot v4.29.1 on Apple Silicon. Supports the official QQ WebSocket adapter (`qq_official`) and text-only personal WeChat (`weixin_oc`). Uses the installed `/Applications/露娜电脑管家.app` persona and model configuration; no model credential is copied into this plugin.
 
-Supported: text chat, explicit memory updates, region updates, task creation, configured-city weather. Long-term memories and tasks share the desktop SQLite notebook. Recent chat context is separate to avoid simultaneous desktop/WeChat history writes. Images/files and outgoing voice are not implemented in this bridge. It does not invoke Codex or execute computer operations remotely.
+## Use
 
-Install `main.py`, `worker.py`, and `metadata.yaml` into the isolated AstrBot data/plugins/luna_mac_bridge directory. Bind the dashboard to 127.0.0.1, use strong authentication and disable the ordinary AstrBot provider pipeline. Keep runtime data outside this repository.
+- Private owner-paired text chat, explicit memory updates, region updates, task creation and configured-city weather.
+- Send one PDF, DOCX, TXT, Markdown, CSV or JSON file, up to 20 MB. PDF reading covers at most 12 pages and 12,000 characters; image-only PDFs need OCR first. DOCX includes paragraphs and tables, excluding image text. The returned report states its actual reading scope.
+- When model summarization times out, the bot returns extracted text as a file and explicitly says no summary was generated.
+- Send audio up to two minutes for local Whisper recognition. Recognition may contain errors. Requests containing “语音”, “念给我” or “说给我听” request a short Japanese Luna voice reply with Chinese captions. Voice generation needs the existing local Luna GPT-SoVITS installation. “测试露娜语音” uses a fixed, clearly identified test sentence to diagnose transport independently of the LLM.
+- “发成文件” exports a reply. Voice jobs are serialized, rate-limited to one per minute, and stop at critical memory pressure or the process budget. Models are unloaded when the worker exits.
 
-Before enabling WeChat, provision `data/plugin_data/luna_mac_bridge/owner.json` with `{"pair_hash":"<SHA256 of a random one-time pairing phrase>"}`. Generate the phrase locally with at least 96 bits of randomness; do not commit it. Send it only in your intended private bot conversation. Successful pairing permanently replaces the hash with the sender/platform identity. Unpaired senders, other platforms and group messages do not receive private data. Re-pair only by explicitly replacing this local owner state.
+Long-term memories/tasks share the desktop SQLite notebook. Recent remote context is separate. No remote computer-operation tools or Codex invocation are exposed by this bridge.
 
-First log in to AstrBot and change its generated initial dashboard password yourself. Then create a Personal WeChat adapter using the official QR login flow. Use a distinct bot connection; do not import another instance's token. Whether the same WeChat bot can be logged into two instances simultaneously is not established by this integration.
+## Installation and boundaries
 
-A real Mac model round trip succeeded locally. Offline tests cover access control and reply delivery. Actual WeChat send/receive requires the user to complete QR login and pairing and has not yet been verified.
+Install the Python sources and metadata into the isolated AstrBot `data/plugins/luna_mac_bridge` directory. Install `requirements.txt` in that instance's environment. Download `Systran/faster-whisper-tiny` into `$ASTRBOT_ROOT/models/whisper-tiny`. Configure AstrBot's FFmpeg path for outgoing QQ audio. Set `PYTHONDONTWRITEBYTECODE=1` to avoid modifying signed desktop resources. Keep dashboard bound to loopback with strong authentication and disable the ordinary AstrBot provider pipeline to prevent duplicate replies.
 
-Run: `python3 -m unittest discover -s integrations/astrbot_luna -p 'test_*.py'`.
+Provision `data/plugin_data/luna_mac_bridge/owner.json` with `{"pair_hash":"<SHA256 of a random one-time pairing phrase>"}`. Generate at least 96 bits of randomness locally. Send the phrase only to the intended bot. Pairing consumes it and binds sender plus platform. Groups and unpaired senders are ignored. Credentials, owner state, conversations, model weights and runtime logs must remain outside the repository.
 
-Official setup: https://github.com/AstrBotDevs/AstrBot/wiki/zh-platform-weixin_oc
+Create an independent QQ official bot through AstrBot's QR flow. The account owner must complete the official login and confirmations. Do not reuse another instance's WeChat login: that may disconnect its existing bot.
+
+## Verification and limitations
+
+Real QQ text reply, audio attachment reception/transcription, and outgoing text-file transport were observed. A freshly synthesized four-second Japanese test reply and matching Chinese captions arrived in the real QQ conversation. General model calls have intermittent timeouts; a successful fixed voice test alone does not prove arbitrary model-generated speech. File fallback has a local integration check. Twelve offline tests cover owner access, delivery, source restrictions and document parsing.
+
+Run `python -m unittest discover -s integrations/astrbot_luna -p 'test_*.py'` using the dedicated environment.
+
+Official setup: https://github.com/AstrBotDevs/AstrBot/wiki/zh-platform-qqofficial-websockets

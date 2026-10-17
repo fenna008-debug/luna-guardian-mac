@@ -19,6 +19,9 @@ class Event:
         self.message_str, self.sender, self.platform = message, sender, platform
         self.group, self.kind, self.stopped, self.sent = group, kind, False, []
 
+    def get_messages(self):
+        return []
+
     def get_platform_name(self):
         return self.kind
 
@@ -48,6 +51,13 @@ class BridgeTests(unittest.IsolatedAsyncioTestCase):
             event_message_type=lambda *a, **k: lambda f: f,
         )
         modules = {
+            "tested_bridge.media": types.SimpleNamespace(receive=AsyncMock()),
+            "astrbot.api.message_components": types.SimpleNamespace(
+                File=type("File", (), {}), Record=type("Record", (), {})
+            ),
+            "astrbot.core.utils.astrbot_path": types.SimpleNamespace(
+                get_astrbot_temp_path=lambda: "/tmp"
+            ),
             "astrbot.api.event": types.SimpleNamespace(
                 AstrMessageEvent=Event, filter=fake_filter
             ),
@@ -56,7 +66,9 @@ class BridgeTests(unittest.IsolatedAsyncioTestCase):
             ),
         }
         spec = importlib.util.spec_from_file_location(
-            "tested_bridge", Path(__file__).with_name("main.py")
+            "tested_bridge",
+            Path(__file__).with_name("main.py"),
+            submodule_search_locations=[],
         )
         self.module = importlib.util.module_from_spec(spec)
         with patch.dict(sys.modules, modules):
@@ -64,6 +76,7 @@ class BridgeTests(unittest.IsolatedAsyncioTestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.bridge = self.module.LunaBridge.__new__(self.module.LunaBridge)
         self.bridge.lock = asyncio.Lock()
+        self.bridge.last_voice = 0.0
         self.bridge.state_path = Path(self.temp.name) / "owner.json"
         self.bridge.state_path.write_text(
             json.dumps({"pair_hash": hashlib.sha256(b"pair-test").hexdigest()})
