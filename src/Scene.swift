@@ -40,7 +40,7 @@ extension PetView {
     }
 }
 extension Guardian {
-    func maybeSpeak(_ text:String,ja:String?=nil,force:Bool=false){
+    func maybeSpeak(_ text:String,ja:String?=nil,force:Bool=false,readingHash:String?=nil){
         // Every dialogue category shares this one admission gate; no synthesis backlog.
         guard !muted,!criticalMode,!speechBusy,!isLocked(),(force || Date().timeIntervalSince(lastSpeech)>180),(force || Int.random(in:0..<100)<45),audio?.isPlaying != true else{return}
         if ja==nil && !llmConfigured(){return}
@@ -52,7 +52,7 @@ extension Guardian {
                 if r["ok"] as? Bool != true{let error=r["error"] as? String ?? "语音未完成";writeJSON(["kind":"dialogue","started":false,"error":error,"at":Date().timeIntervalSince1970],"voice-playback.json");if force{self.petView.say(error,seconds:12)}}
                 guard self.speechGeneration==token,!self.muted,!self.criticalMode,!self.isLocked(),!self.fortuneBusy,let d=r["data"] as? [String:Any],let path=d["path"] as? String,let a=try? AVAudioPlayer(contentsOf:URL(fileURLWithPath:path)) else{return}
                 self.audio?.stop();self.audio=a;a.delegate=self;a.volume=0.65
-                self.petView.say(d["zh"] as? String ?? text,seconds:a.duration+1)
+                self.petView.say(d["zh"] as? String ?? text,seconds:readingHash==nil ? a.duration+1:max(24,a.duration+1),readingHash:readingHash)
                 writeJSON(["kind":"dialogue","started":a.play(),"at":Date().timeIntervalSince1970,"duration":a.duration],"voice-playback.json")
             }
         }

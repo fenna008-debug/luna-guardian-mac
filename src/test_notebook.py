@@ -39,3 +39,17 @@ class RoutingPolicy(unittest.TestCase):
   with patch.object(b,'chat') as chat:
    b.routed_chat('记住：我偏爱简洁回答');chat.assert_not_called()
   self.assertIn('简洁回答',notebook.context(b.BASE))
+
+class RegionMemory(unittest.TestCase):
+ def setUp(self):self.tmp=tempfile.TemporaryDirectory();self.base=Path(self.tmp.name)
+ def tearDown(self):self.tmp.cleanup()
+ def test_natural_region_upserts_one_real_note(self):
+  self.assertEqual(notebook.remember_region(self.base,'我在大阪东淀川区'),'大阪东淀川区')
+  notebook.remember_region(self.base,'我的地区是大阪東淀川区。')
+  rows=notebook.manage(self.base,{'op':'list'})['items'];self.assertEqual(len(rows),1);self.assertIn('東淀川',rows[0]['text'])
+ def test_travel_quote_and_negation_do_not_change_memory(self):
+  for text in ('我想去大阪','我以前住在大阪','朋友说我在大阪','我在大阪吗','“我在大阪”','我在考虑搬到大阪','我不在大阪','我在大阪，明天旅游'):
+   self.assertIsNone(notebook.remember_region(self.base,text),text)
+ def test_secret_rejected_on_update(self):
+  row=notebook.manage(self.base,{'op':'add','text':'safe'})
+  with self.assertRaises(ValueError):notebook.manage(self.base,{'op':'update','id':row['id'],'text':'密码：private'})

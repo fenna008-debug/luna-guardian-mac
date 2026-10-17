@@ -55,18 +55,17 @@ final class LunaLife {
             guard let self=self,let o=self.owner else{return};self.readingBusy=false
             guard let d=r["data"] as? [String:Any] else{self.note("联网阅读暂未成功，未增加已读记录。");return}
             self.reading=d
-            o.petView.bookBadge.title="📖✦";o.petView.bookBadge.toolTip="有新的读书感想，点击查看"
             o.notebook?.reload()
             guard self.enabled,!o.isLocked(),!o.fortuneBusy,!o.companion.chatBusy,!self.walking else{return}
             
             self.activity="刚读完一段，想与你分享";self.lastChange=Date();o.animate("happy",seconds:2)
-            o.petView.say("刚读到有趣的一段。点 📖✦ 看我的手记。",seconds:9)
+            o.petView.say("刚读到有趣的一段。点这段字幕，听听我的感想吧。",seconds:24,readingHash:d["evidenceHash"] as? String)
             o.petView.sceneKind=d["kind"] as? String == "tea" ? "tea":"book";o.petView.refreshScene()
             let readingToken=o.stateToken
             DispatchQueue.main.asyncAfter(deadline:.now()+5){[weak o] in guard let o=o,o.stateToken==readingToken,!o.companion.chatBusy,!o.fortuneBusy else{return};o.animate("happy",seconds:2)}
             if Date().timeIntervalSince(self.lastLine)>240,!o.popover.isShown{
                 self.lastLine=Date()
-                o.maybeSpeak("刚读到有趣的一段。点书签，看我的读书手记吧。")
+                o.maybeSpeak("刚读到有趣的一段。点这段字幕，看看我的读书感想吧。",readingHash:d["evidenceHash"] as? String)
             };o.center?.refreshLife()
         }
     }

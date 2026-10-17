@@ -1,13 +1,13 @@
 [
   {
     "path": ".gitignore",
-    "sha256": "7ba0f14d11a4d37f961f43d3875c1cac133e0686eb0fbd5d43846a1dd66af164",
-    "bytes": 210
+    "sha256": "5a24fe3f3bf60c265bbfea34e69598edbde9fbe1042f944196333b553599ae8e",
+    "bytes": 572
   },
   {
     "path": "README.md",
-    "sha256": "410ab49cdb24e79fc432ba9e8e53e0dda961df76f5fd7612c836f5839f89c046",
-    "bytes": 2564
+    "sha256": "b22d7d9b23255d9ab7762a0395010a0adf18248f363b5fcabf1f67269a59b464",
+    "bytes": 2975
   },
   {
     "path": "assets/actions/daily.png",
@@ -91,13 +91,13 @@
   },
   {
     "path": "build.py",
-    "sha256": "fa32f034f6a83f900ecd48fc3ecbcd8a93470210f9ef2e3b10484e5c2a5976a6",
-    "bytes": 2374
+    "sha256": "eb77190dce085dac7845a443fe0301be6e53ee17a7038fb02701ce6c3757d959",
+    "bytes": 2392
   },
   {
     "path": "docs/CONFIGURATION.md",
-    "sha256": "db77bd63dea659c5ebd39a3a6e51e4c78760d440173bef5b8aaaaa06367a0341",
-    "bytes": 3462
+    "sha256": "3b8aab81e8a4d7528e975ff0f65425f6af26b6af781db6215a3e572e3fe0f324",
+    "bytes": 4941
   },
   {
     "path": "docs/REFERENCES.md",
@@ -110,9 +110,14 @@
     "bytes": 3981
   },
   {
+    "path": "docs/SECURITY.md",
+    "sha256": "f39b26ed1b9b6b8219426e6adac6ab544c23cba3d10f444acc40fb5c24168a54",
+    "bytes": 1220
+  },
+  {
     "path": "docs/VERIFICATION.md",
-    "sha256": "4ee8e83ee9f28ef8b4f1ff07f1f7217806d65f01a95c019b78829176a569b811",
-    "bytes": 2415
+    "sha256": "c0b93f46cdddde1539154a863cf17d2239128389f4469f5e9366a699b471aa7e",
+    "bytes": 2772
   },
   {
     "path": "examples/model.example.json",
@@ -151,8 +156,8 @@
   },
   {
     "path": "src/Life.swift",
-    "sha256": "37c7cfcac250ebe7692be51401c295cf17c5d707ac7c5f463cc022b5a31b5545",
-    "bytes": 15497
+    "sha256": "3b3d17f20b179854eaa9761c8d9bc0c6fc0a460948125ad3df556a6392191e10",
+    "bytes": 15486
   },
   {
     "path": "src/Notebook.swift",
@@ -161,13 +166,18 @@
   },
   {
     "path": "src/Scene.swift",
-    "sha256": "242f053200e741f959e52361db1147804349eb45b3336a9d6e8f7684e7f6b152",
-    "bytes": 5079
+    "sha256": "263fe859d31ba35ec31c3293e64a6861c81fbc5edcc72bdfa099bd438bccc621",
+    "bytes": 5167
   },
   {
     "path": "src/backend.py",
-    "sha256": "66f937237ea313f1b0c08c59df19857cb32f4a1827b7fe613e7f01f8f9d86a41",
-    "bytes": 31877
+    "sha256": "ce62ec5dffcfe969fa7c6d97495db791175cb8633be6dce2491d0124a61de46d",
+    "bytes": 32558
+  },
+  {
+    "path": "src/github_watch.py",
+    "sha256": "b7d22cffcd203c69ff36b6f7f754a5b71118cb96a4d9c34f7caa880631460891",
+    "bytes": 3778
   },
   {
     "path": "src/handoff.py",
@@ -181,8 +191,8 @@
   },
   {
     "path": "src/main.swift",
-    "sha256": "978c723214536280035f3bad62a082dd25e5f4d3dda01dc09e2fe2a666f95758",
-    "bytes": 43483
+    "sha256": "2d65f1b658a84723042e943349041eac34b21d49fdef5640b15f0435013e175f",
+    "bytes": 44848
   },
   {
     "path": "src/maintenance.py",
@@ -196,13 +206,13 @@
   },
   {
     "path": "src/notebook.py",
-    "sha256": "bcc485c206802024da28819cc02f9fdbc07ca24e0ee33ab4beca6dbe9dc8c74c",
-    "bytes": 2620
+    "sha256": "c13a43a3eeffe9ec7b761a85ce54b1cb3417ec5f6df225af9fd68ce6450cc760",
+    "bytes": 3941
   },
   {
     "path": "src/persona_luna.txt",
-    "sha256": "5187bfbfd4cd66989c5daabe356e01f5b2710aee885a4515edff352d26d1e0bf",
-    "bytes": 2538
+    "sha256": "b063530741cb93c7c395f165394aeb7f05572d95cc6d5c0853fe22a6dc6e07b4",
+    "bytes": 2831
   },
   {
     "path": "src/reading.py",
@@ -225,14 +235,19 @@
     "bytes": 11004
   },
   {
+    "path": "src/test_github_watch.py",
+    "sha256": "241fc3927480e12a59c2cb10b1c51cad4fc5cea8e6d5910b69b90bbb598b4f4b",
+    "bytes": 1316
+  },
+  {
     "path": "src/test_handoff.py",
     "sha256": "7d37fc377fad60a7d06168002c6077ed459b0b5a8dfcbc02155c999e19efe0e6",
     "bytes": 1779
   },
   {
     "path": "src/test_notebook.py",
-    "sha256": "3083187d48c86be108597c15e9b1b32f57dc0194946b76691243dc5c4b74e381",
-    "bytes": 3053
+    "sha256": "6423fa72b7fcd858e354b5c3d978b8d0d9941212c8628bcfbacd9ef4e436ba5a",
+    "bytes": 4136
   },
   {
     "path": "src/test_reading.py",

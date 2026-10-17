@@ -24,7 +24,8 @@ final class PetPanel: NSPanel { override var canBecomeKey: Bool { true } }
 final class PetView: NSView {
     weak var owner: Guardian?
     let character = CALayer(), prop = CATextLayer(), bubble = CATextLayer(),scene=CALayer()
-    let bookBadge=NSButton(title:"📖",target:nil,action:nil)
+    let readingSubtitle=NSButton(title:"",target:nil,action:nil)
+    var readingHash:String?
     var sceneKind=""
     var states:[String:[CGImage]] = [:]
     var lookFrames:[CGImage]=[],lookIndex = -1,dragDirection="",previousDragX:CGFloat=0
@@ -42,11 +43,11 @@ final class PetView: NSView {
             for (name,(row,count)) in rows { states[name]=(0..<count).compactMap{col in sheet.cropping(to:CGRect(x:col*192,y:row*208,width:192,height:208))} }
             for i in 0..<16 {let x=CGFloat((i % 8)*192);let y=CGFloat((9+i/8)*208);if let image=sheet.cropping(to:CGRect(x:x,y:y,width:192,height:208)){lookFrames.append(image)}}
         }
-        bookBadge.bezelStyle = .circular;bookBadge.font = .systemFont(ofSize:20);bookBadge.toolTip="露娜的读书手记";bookBadge.target=self;bookBadge.action=#selector(openNotebook);bookBadge.setAccessibilityLabel("读书感想与记忆任务");addSubview(bookBadge)
+        readingSubtitle.isBordered=false;readingSubtitle.isTransparent=true;readingSubtitle.isHidden=true;readingSubtitle.target=self;readingSubtitle.action=#selector(openNotebook);addSubview(readingSubtitle)
         loadActions();setState("idle")
-        setAccessibilityElement(true);setAccessibilityLabel("露娜桌宠，点击聊天，拖动移动，滚轮缩放")
+        setAccessibilityElement(true);setAccessibilityLabel("露娜桌宠，点击聊天，拖动移动")
     }
-    @objc func openNotebook(){bookBadge.title="📖";owner?.showNotebook(0)}
+    @objc func openNotebook(){guard let key=readingHash else{return};owner?.showNotebook(0);if let n=owner?.notebook,let i=n.rows.firstIndex(where:{($0["evidenceHash"] as? String)==key}){n.picker.selectItem(at:i);n.select()}}
     required init?(coder:NSCoder){fatalError()}
     func setState(_ state:String) {
         let map=["scan":"think","clean":"walk","fortune":"happy","rain":"tap","storm":"surprise","snow":"surprise","cold":"tap","hot":"sleep","sunny":"happy","night":"idle","cloudy":"idle","chat":"think","focus":"think"]
@@ -61,7 +62,7 @@ final class PetView: NSView {
         if state=="hot" || state=="cold" {let a=CABasicAnimation(keyPath:"transform.translation.x");a.fromValue = -2;a.toValue=2;a.duration=state=="cold" ? 0.1:0.7;a.autoreverses=true;a.repeatCount = .infinity;character.add(a,forKey:"reaction")}
     }
     var bubbleToken=UUID()
-    func say(_ text:String,seconds:Double=10){let token=UUID();bubbleToken=token;bubble.string="\n"+text;bubble.opacity=1;DispatchQueue.main.asyncAfter(deadline:.now()+seconds){[weak self] in if self?.bubbleToken==token{self?.bubble.opacity=0}}}
+    func say(_ text:String,seconds:Double=10,readingHash:String?=nil){self.readingHash=readingHash;readingSubtitle.isHidden=readingHash==nil;readingSubtitle.frame=bubble.frame;readingSubtitle.setAccessibilityLabel(text+"，点击查看读书感想");readingSubtitle.toolTip=readingHash==nil ? nil:"点击这段字幕，查看感想并留言";let token=UUID();bubbleToken=token;bubble.string="\n"+text;bubble.opacity=1;DispatchQueue.main.asyncAfter(deadline:.now()+seconds){[weak self] in if self?.bubbleToken==token{self?.bubble.opacity=0;self?.readingSubtitle.isHidden=true;self?.readingHash=nil}}}
     override func mouseDown(with event:NSEvent){owner?.life?.stopWalking();owner?.life?.lastTouch=Date();startMouse=window?.convertPoint(toScreen:event.locationInWindow) ?? NSEvent.mouseLocation;previousDragX=startMouse.x;startWindow=window?.frame.origin ?? .zero;dragged=false;dragDirection=""}
     override func mouseDragged(with event:NSEvent){
         let now=window?.convertPoint(toScreen:event.locationInWindow) ?? NSEvent.mouseLocation
@@ -105,8 +106,6 @@ final class PetView: NSView {
         }else if !near && nearPointer && lookIndex>=0 {setState("idle")}
         nearPointer=near
     }
-    override func scrollWheel(with event:NSEvent){guard abs(event.scrollingDeltaY)>0.1,let owner=owner else{return};owner.resizePet(owner.petSize+event.scrollingDeltaY*1.5)}
-    override func magnify(with event:NSEvent){guard let owner=owner else{return};owner.resizePet(owner.petSize*(1+event.magnification))}
     override func rightMouseDown(with event:NSEvent){if let m=owner?.makeMenu(){NSMenu.popUpContextMenu(m,with:event,for:self)}}
 }
 final class Guardian:NSObject,NSApplicationDelegate,CLLocationManagerDelegate,AVAudioPlayerDelegate {
@@ -126,6 +125,7 @@ final class Guardian:NSObject,NSApplicationDelegate,CLLocationManagerDelegate,AV
     let monitorQueue=OperationQueue()
     func openCenter(_ tab:Int=0){popover.close();if center==nil{center=CareCenter(self)};center?.show(tab)}
 
+    var repoTimer:Timer?,repoBusy=false
     var metricsTimer:Timer?,weatherTimer:Timer?,focusTimer:Timer?,studyTimer:Timer?
     var watching=true,metricBusy=false,weatherBusy=false,webReady=false,muted=false,studyEnabled=false,studyBusy=false,jobBusy=false
     var lastMetrics:[String:Any]=[:],lastWeather:[String:Any]=[:],lastWarning:Date = .distantPast,focusEnd:Date?
@@ -138,7 +138,7 @@ final class Guardian:NSObject,NSApplicationDelegate,CLLocationManagerDelegate,AV
         NSApp.setActivationPolicy(.accessory)
         try? fm.createDirectory(at:support,withIntermediateDirectories:true)
         writeJSON(["screenCaptureGranted":CGPreflightScreenCaptureAccess(),"checkedAt":Date().timeIntervalSince1970],"capabilities.json")
-        muted=UserDefaults.standard.bool(forKey:"muted");studyEnabled = !UserDefaults.standard.bool(forKey:"studyPaused")
+        muted=UserDefaults.standard.bool(forKey:"muted");studyEnabled = UserDefaults.standard.object(forKey:"studyPaused") != nil && !UserDefaults.standard.bool(forKey:"studyPaused")
         let opacity=UserDefaults.standard.double(forKey:"glassAlpha");popover.alphaValue=opacity>0 ? opacity:0.90
         monitorQueue.maxConcurrentOperationCount=1;monitorQueue.qualityOfService = .utility
         workerQueue.maxConcurrentOperationCount=1
@@ -162,6 +162,7 @@ final class Guardian:NSObject,NSApplicationDelegate,CLLocationManagerDelegate,AV
         locationManager.delegate=self;locationManager.desiredAccuracy=kCLLocationAccuracyThreeKilometers;locationManager.distanceFilter=5000
         NSWorkspace.shared.notificationCenter.addObserver(forName:NSWorkspace.didActivateApplicationNotification,object:nil,queue:.main){[weak self] note in guard let app=note.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication,app.bundleIdentifier != Bundle.main.bundleIdentifier else{return};self?.lastApp=app;self?.idleAppCare.used(app)}
         lastApp=NSWorkspace.shared.frontmostApplication
+        repoTimer=Timer.scheduledTimer(withTimeInterval:90,repeats:true){[weak self]_ in self?.checkRepository()}
         metricsTimer=Timer.scheduledTimer(withTimeInterval:90,repeats:true){[weak self]_ in self?.refreshMetrics()}
         weatherTimer=Timer.scheduledTimer(withTimeInterval:900,repeats:true){[weak self]_ in self?.refreshWeather()}
         studyTimer=Timer.scheduledTimer(withTimeInterval:180,repeats:true){[weak self]_ in if self?.studyEnabled==true{self?.study(manual:false)}}
@@ -170,7 +171,7 @@ final class Guardian:NSObject,NSApplicationDelegate,CLLocationManagerDelegate,AV
         resizePet(saved>0 ? CGFloat(saved):220)
         petView.say("我在这里。点我说话，右键还有更多。",seconds:7)
         life=LunaLife(self);_ = idleAppCare
-        refreshMetrics();refreshWeather()
+        refreshMetrics();refreshWeather();checkRepository()
     }
     func showDashboard(){
         if popover.isShown {popover.close();return}
@@ -188,8 +189,8 @@ final class Guardian:NSObject,NSApplicationDelegate,CLLocationManagerDelegate,AV
         CATransaction.begin();CATransaction.setDisableActions(true)
         petView.character.frame=CGRect(x:(w-petSize)/2,y:4,width:petSize,height:petSize*208/192)
         petView.bubble.frame=CGRect(x:8,y:h-82,width:w-16,height:76)
+        petView.readingSubtitle.frame=petView.bubble.frame
         petView.prop.frame=CGRect(x:w/2+petSize*0.17,y:petSize*0.22,width:65,height:70)
-        petView.bookBadge.frame=NSRect(x:w-46,y:petSize*0.70,width:38,height:38)
         CATransaction.commit();petView.refreshScene()
         if companion.isViewLoaded{companion.slider.doubleValue=Double(petSize)}
     }
@@ -255,6 +256,18 @@ final class Guardian:NSObject,NSApplicationDelegate,CLLocationManagerDelegate,AV
     };operation.queuePriority = ["chat","assist","voiceLine"].contains(action) ? .veryHigh:.normal;queue.addOperation(operation)
     }
     func animate(_ state:String,text:String?=nil,seconds:Double=0){guard !fortuneBusy else{return};currentState=state;if !criticalMode{petView.setState(state)};let token=UUID();stateToken=token;if let text=text{petView.say(text);event("quote",["text":text]);maybeSpeak(text)};if seconds>0{DispatchQueue.main.asyncAfter(deadline:.now()+seconds){[weak self] in guard let self=self,self.stateToken==token else{return};if !self.criticalMode && !self.fortuneBusy{self.petView.setState("idle")};self.currentState="idle"}}}
+    func checkRepository(){
+        guard !repoBusy else{return};repoBusy=true
+        run("repoWatch"){[weak self] r in
+            guard let self=self else{return};self.repoBusy=false
+            guard !self.isLocked(),!self.jobBusy,!self.popover.isShown,!self.fortuneBusy,
+                  let d=r["data"] as? [String:Any],let rows=d["pending"] as? [[String:Any]],!rows.isEmpty else{return}
+            let text=rows.count==1 ? (rows[0]["text"] as? String ?? "仓库有新动态。") : "仓库有 \(rows.count) 条新动态，Star 或留言更新了。到 GitHub 看看吧。"
+            self.animate("happy",seconds:6);self.petView.say(text,seconds:24);self.life?.note(text)
+            writeJSON(["at":Date().timeIntervalSince1970,"count":rows.count,"text":text],"github-notification-shown.json")
+            self.run("repoAck",["ids":rows.compactMap{$0["id"] as? String}]){_ in}
+        }
+    }
     func refreshMetrics(){guard watching,!metricBusy else{return};metricBusy=true;run("metrics"){[weak self] r in guard let self=self else{return};self.metricBusy=false;guard let d=r["data"] as? [String:Any] else{return};self.lastMetrics=d;self.handleHealth(d["health"] as? [String:Any] ?? [:]);self.event("metrics",d);writeJSON(d,"last-metrics.json")}}
     func refreshWeather(){guard !resourceLimited,!weatherBusy else{return};weatherBusy=true;run("weather"){[weak self] r in guard let self=self else{return};self.weatherBusy=false;if let d=r["data"] as? [String:Any]{self.handleWeather(d)}else{self.event("toast",["text":r["error"] ?? "天气未更新"])}}}
     func handleWeather(_ d:[String:Any]){lastWeather=d;event("weather",d);let rawState=d["state"] as? String ?? "idle";let night=(d["current"] as? [String:Any])?["is_day"] as? Int == 0;let state=rawState=="sunny" && night ? "night":rawState;if !jobBusy{animate(state,seconds:12)};if ["storm","snow","hot","cold"].contains(state){let key="weatherVoice-"+state;let last=UserDefaults.standard.double(forKey:key);if Date().timeIntervalSince1970-last>21600,!muted,!isLocked(){if playVoice(state){UserDefaults.standard.set(Date().timeIntervalSince1970,forKey:key)}}}}
@@ -387,7 +400,7 @@ final class Guardian:NSObject,NSApplicationDelegate,CLLocationManagerDelegate,AV
         case "scan","clean","restore","security","chat","history","chatHistory","modelConfig","guardReports","guardConfig","weather":
             if action=="scan" && resourceLimited{reply(id,"电脑正在轻量照看模式，暂不启动扫描。",ok:false);return};if ["scan","clean","restore"].contains(action){guard !jobBusy else{reply(id,"另一个整理任务还在进行。",ok:false);return};jobBusy=true;p["active"]=NSWorkspace.shared.runningApplications.compactMap{$0.bundleIdentifier};let text=action=="scan" ? "又积了些灰？我先检查一下，别急着全扔。":action=="clean" ? "好吧，我来扫。重要的东西可别混进去。":"把东西放回原处，也是一门功夫。";animate(action=="scan" ? "scan":"clean",text:text)}
             if action=="chat"{speechGeneration=UUID();life?.lastTouch=Date();life?.stopWalking();animate("chat");petView.say("嗯，我在听。")}
-            run(action,p){[weak self] r in guard let self=self else{return};if ["scan","clean","restore"].contains(action){self.jobBusy=false;self.animate(r["ok"] as? Bool==true ? "happy":"surprise",text:r["ok"] as? Bool==true ? "这一步完成了，结果在清单里。":"这一步没有完成，先看看提示。",seconds:5)};if action=="chat"{self.animate("wave",seconds:4);if let d=r["data"] as? [String:Any],let answer=d["answer"] as? String{self.maybeSpeak(answer)}};if action=="weather",let d=r["data"] as? [String:Any]{self.handleWeather(d)};self.reply(id,r["data"] ?? r["error"] ?? "未知结果",ok:r["ok"] as? Bool ?? false)}
+            run(action,p){[weak self] r in guard let self=self else{return};if ["scan","clean","restore"].contains(action){self.jobBusy=false;self.animate(r["ok"] as? Bool==true ? "happy":"surprise",text:r["ok"] as? Bool==true ? "这一步完成了，结果在清单里。":"这一步没有完成，先看看提示。",seconds:5)};if action=="chat"{if self.notebook?.window?.isVisible==true,self.notebook?.tabs.selectedSegment==1{self.notebook?.reload()};self.animate("wave",seconds:4);if let d=r["data"] as? [String:Any],let answer=d["answer"] as? String{self.maybeSpeak(answer)}};if action=="weather",let d=r["data"] as? [String:Any]{self.handleWeather(d)};self.reply(id,r["data"] ?? r["error"] ?? "未知结果",ok:r["ok"] as? Bool ?? false)}
         default:reply(id,"不支持的操作",ok:false)
         }
     }

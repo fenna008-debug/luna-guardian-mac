@@ -224,7 +224,12 @@ def chat(message,remember=True,timeout=45):
   answer=data['choices'][0]['message']['content']
   answer=re.sub(r'<think>.*?</think>','',answer or '',flags=re.S).strip()
   if not answer:raise ValueError('LLM没有返回正文；请检查模型是否耗尽推理预算或接口响应格式')
-  outcome='ok'
+  if remember:
+   try: internal=json.loads(re.sub(r'^```(?:json)?\s*|\s*```$','',answer.strip()))
+   except (ValueError,TypeError):internal=None
+   if isinstance(internal,dict) and internal.get('type')=='memory_update':
+    answer='这条信息还没有写入长期记忆。你可以直接说“记住：”加上要保存的内容。'
+  outcome='ok' 
  except (TimeoutError, __import__('socket').timeout):raise ValueError('LLM服务等待超时，请稍后重试；原文已保留。')
  except urllib.error.HTTPError as e:raise ValueError('LLM服务返回HTTP '+str(e.code)+'，请检查认证和模型配置。')
  except urllib.error.URLError:raise ValueError('暂时连接不到LLM。请检查服务地址、网络和服务器状态。不会自动转用Codex。')
@@ -239,7 +244,10 @@ def _routed_chat(message):
  # Called only for actual human chat; OCR, reading and voice never enter here.
  def recorded(answer):
   rows=read('chat.json',[]);rows.extend([{'role':'user','text':message},{'role':'assistant','text':answer}]);save('chat.json',rows[-100:]);return {'answer':answer}
- from notebook import manage
+ from notebook import manage,remember_region
+ region=remember_region(BASE,message)
+ if region:
+  return recorded('嗯，已记住你的常住地区是'+region+'。') | {'memoryChanged':True}
  if re.match(r'^(?:请)?(?:记住|记一下|记下来)[：:，, ]?',message):
   value=re.sub(r'^(?:请)?(?:记住|记一下|记下来)[：:，, ]?','',message).strip();r=manage(BASE,{'kind':'memory','op':'add','text':value});return recorded('我记下了：'+value+'。可以在“记忆”里修改或删除。')
  if re.match(r'^(?:添加|新增|记个|记一个)(?:任务|待办)[：:，, ]?',message):
@@ -354,6 +362,12 @@ def voice_line(p):
  return {'ja':ja,'zh':zh}
 
 def dispatch(a,p):
+ if a=='repoWatch':
+  from github_watch import tick
+  return tick(read,save)
+ if a=='repoAck':
+  from github_watch import acknowledge
+  return acknowledge(read,save,p.get('ids',[]))
  if a=='metrics':
   from maintenance import tick
   tick(read,save)

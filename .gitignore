@@ -18,3 +18,24 @@ context-window.json
 maintenance.json
 tool-events.json
 llm-last-request.json
+
+# Runtime data must never be published
+LunaGuardian/
+Recovery/
+CodexJobs/
+Temporary/
+reading-comments.json
+reading-preferences.json
+reading-state.json
+model-verified.json
+weather.json
+weather-last.json
+guard-*.json
+recovery-*.json
+github-watch*.json
+github-notification*.json
+screen-observation.json
+last-metrics.json
+codex-status.json
+history.json
+life-*.json
