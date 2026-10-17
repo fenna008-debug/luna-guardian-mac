@@ -51,13 +51,14 @@ final class PetView: NSView {
         loadActions();setState("idle")
         setAccessibilityElement(true);setAccessibilityLabel("露娜桌宠，点击聊天，拖动移动")
     }
-    @objc func openNotebook(){guard let key=readingHash else{return};owner?.showNotebook(0);if let n=owner?.notebook,let i=n.rows.firstIndex(where:{($0["evidenceHash"] as? String)==key}){n.picker.selectItem(at:i);n.select()}}
+    @objc func openNotebook(){guard let key=readingHash else{return};dismissReadingCaption();owner?.showNotebook(0);if let n=owner?.notebook,let i=n.rows.firstIndex(where:{($0["evidenceHash"] as? String)==key}){n.picker.selectItem(at:i);n.select()}}
     @objc func openUnread(){guard let key=unreadReadingHash else{return};readingHash=key;openNotebook()}
     func markReadingUnread(_ key:String){
         guard !key.isEmpty else{return};unreadReadingHash=key;unreadBadge.isHidden=true;writeJSON(["hash":key,"at":Date().timeIntervalSince1970],"reading-unread.json")
         DispatchQueue.main.asyncAfter(deadline:.now()+120){[weak self] in guard let self=self,self.unreadReadingHash==key else{return};self.unreadBadge.isHidden=false}
     }
-    func clearReadingUnread(){unreadReadingHash=nil;unreadBadge.isHidden=true;writeJSON([:],"reading-unread.json")}
+    func dismissReadingCaption(){bubbleToken=UUID();bubble.opacity=0;readingSubtitle.isHidden=true;readingHash=nil}
+    func clearReadingUnread(){dismissReadingCaption();unreadReadingHash=nil;unreadBadge.isHidden=true;writeJSON([:],"reading-unread.json")}
     required init?(coder:NSCoder){fatalError()}
     func setState(_ state:String) {
         let map=["scan":"think","clean":"walk","fortune":"happy","rain":"tap","storm":"surprise","snow":"surprise","cold":"tap","hot":"sleep","sunny":"happy","night":"idle","cloudy":"idle","chat":"think","focus":"think"]

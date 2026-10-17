@@ -378,6 +378,9 @@ def dispatch(a,p):
  if a=='readOnline':
   from reading import read_next
   return read_next(BASE,chat,read,save)
+ if a=='readingTranslate':
+  from reading import translate_entry
+  return translate_entry(p,chat,read,save)
  if a=='readingLog':return read('reading-log.json',[])
  if a=='voiceLine':return voice_line(p)
  if a=='life':return life_plan(p)

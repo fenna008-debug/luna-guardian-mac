@@ -6,8 +6,8 @@
   },
   {
     "path": "README.md",
-    "sha256": "15cb2e88544cff2a16cfedceb63da0aea421447404f62b422f4588a791630d60",
-    "bytes": 3147
+    "sha256": "8ee9dac78dfeb23c85a5092605235982c2844ff445e2c63769d380b6e62c889a",
+    "bytes": 3377
   },
   {
     "path": "assets/actions/daily.png",
@@ -91,7 +91,7 @@
   },
   {
     "path": "build.py",
-    "sha256": "572ce14914fd08ff44c48845090e083c476d159307a597aa76a7a64cb83e31dd",
+    "sha256": "479e20bf35dca6e6cd97844f136646a3e5ce52eef92c6597236f84306276c631",
     "bytes": 2392
   },
   {
@@ -116,8 +116,8 @@
   },
   {
     "path": "docs/VERIFICATION.md",
-    "sha256": "c0b93f46cdddde1539154a863cf17d2239128389f4469f5e9366a699b471aa7e",
-    "bytes": 2772
+    "sha256": "670a8321812a2effaedad2e536c60a16b67bacc192dcf84b11982272d9326025",
+    "bytes": 2992
   },
   {
     "path": "examples/model.example.json",
@@ -161,8 +161,8 @@
   },
   {
     "path": "src/Notebook.swift",
-    "sha256": "ae202497b66e86a8871c7d4735f7ad15c86bc47c5e10eb2e3749e658cdd0d28e",
-    "bytes": 8566
+    "sha256": "11e08e8ec3fc2ab03a7805f9e73c6b426d7468abdc17fb55a9299343bbfe5667",
+    "bytes": 9817
   },
   {
     "path": "src/Scene.swift",
@@ -171,8 +171,8 @@
   },
   {
     "path": "src/backend.py",
-    "sha256": "ce62ec5dffcfe969fa7c6d97495db791175cb8633be6dce2491d0124a61de46d",
-    "bytes": 32558
+    "sha256": "f4d463a1edb8323504a47847725ed6682315eeb44fee2060695e6e947ca56515",
+    "bytes": 32666
   },
   {
     "path": "src/github_watch.py",
@@ -191,8 +191,8 @@
   },
   {
     "path": "src/main.swift",
-    "sha256": "387c2dc8a3685185e54e08927cdf23f21f864ca8fdd87c4e3fb371ead6e6a2f0",
-    "bytes": 46110
+    "sha256": "82847f52bb40adddf75605a131dc2ecc7db14f4977964e897ada5416fbb862c0",
+    "bytes": 46274
   },
   {
     "path": "src/maintenance.py",
@@ -216,8 +216,8 @@
   },
   {
     "path": "src/reading.py",
-    "sha256": "9f3d302101550ca1214a0bef71209b78d024af812538cffe900fc4ab7b6fd758",
-    "bytes": 6495
+    "sha256": "2fc72f518bb7eb9a5d612577cb1a6b63690aa822ee8fed62e3b28e8d714a208d",
+    "bytes": 7927
   },
   {
     "path": "src/speech.py",
@@ -251,8 +251,8 @@
   },
   {
     "path": "src/test_reading.py",
-    "sha256": "94feea49c5f5128ceb27ecbc180fc20c0caaae898a1e4d1410937d9c8c298c10",
-    "bytes": 1599
+    "sha256": "70aa6bcb74ce290a2633101d64e3499b061f85620b439837701a4d114ac76335",
+    "bytes": 2850
   },
   {
     "path": "src/web_tools.py",

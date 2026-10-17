@@ -7,6 +7,7 @@ final class LunaNotebook:NSWindowController {
     let add=NSButton(title:"添加",target:nil,action:nil),change=NSButton(title:"保存修改",target:nil,action:nil),remove=NSButton(title:"删除",target:nil,action:nil),source=NSButton(title:"打开原文",target:nil,action:nil)
     var rows:[[String:Any]]=[]
     var commentBusy=false
+    var translationAttempts=Set<String>()
     var kind:String {tabs.selectedSegment==1 ? "memory":"task"}
     init(_ guardian:Guardian){
         self.guardian=guardian
@@ -24,7 +25,7 @@ final class LunaNotebook:NSWindowController {
         hint.frame=NSRect(x:24,y:20,width:552,height:36);hint.font = .systemFont(ofSize:11);hint.textColor = .secondaryLabelColor;hint.maximumNumberOfLines=2;root.addSubview(hint);w.center()
     }
     required init?(coder:NSCoder){fatalError()}
-    func show(_ section:Int=0){tabs.selectedSegment=section;reload();window?.makeKeyAndOrderFront(nil);NSApp.activate(ignoringOtherApps:true)}
+    func show(_ section:Int=0){translationAttempts.removeAll();tabs.selectedSegment=section;window?.makeKeyAndOrderFront(nil);reload();NSApp.activate(ignoringOtherApps:true)}
     @objc func reload(){
         let section=tabs.selectedSegment
         edit.isHidden=section==3;status.isHidden=section != 2;add.isHidden=section==3;change.isHidden=section==0 || section==3;remove.isHidden=section==0;source.isHidden=section != 0
@@ -47,10 +48,20 @@ final class LunaNotebook:NSWindowController {
         let r=rows[picker.indexOfSelectedItem]
         if tabs.selectedSegment==0 {
             let stamp=(r["time"] as? Double).map{DateFormatter.localizedString(from:Date(timeIntervalSince1970:$0),dateStyle:.long,timeStyle:.medium)} ?? "未记录"
-            body.string="联网阅读时间："+stamp+"（本机时区）\n\n"+(r["title"] as? String ?? "")+"\n"+(r["scope"] as? String ?? "")+"\n\n露娜的感想\n"+(r["reflection"] as? String ?? "未生成")+"\n\n原文节选\n"+(r["quote"] as? String ?? "")+"\n\n来源\n"+(r["url"] as? String ?? "")}
+            body.string="联网阅读时间："+stamp+"（本机时区）\n\n"+(r["title"] as? String ?? "")+"\n"+(r["scope"] as? String ?? "")+"\n\n露娜的感想\n"+(r["reflection"] as? String ?? "未生成")+"\n\n原文节选\n"+(r["quote"] as? String ?? "")+"\n\n中文译文（模型翻译）\n"+(r["translation"] as? String ?? "译文尚未生成。")+"\n\n来源\n"+(r["url"] as? String ?? "")}
         else if tabs.selectedSegment==3 {body.string=(r["tool"] as? String ?? "工具")+"\n结果："+(r["outcome"] as? String ?? "未知")+"\n耗时：\(r["seconds"] ?? 0) 秒\n时间："+DateFormatter.localizedString(from:Date(timeIntervalSince1970:r["at"] as? Double ?? 0),dateStyle:.medium,timeStyle:.medium)}
         else {edit.stringValue=r["text"] as? String ?? "";body.string=edit.stringValue;let values=["pending","in_progress","done"];status.selectItem(at:values.firstIndex(of:r["status"] as? String ?? "pending") ?? 0)}
         if tabs.selectedSegment==0 {
+            if r["translation"] == nil,let key=r["evidenceHash"] as? String,!translationAttempts.contains(key),window?.isVisible==true {
+                translationAttempts.insert(key);hint.stringValue="正在补充这段原文的中文译文…"
+                guardian?.run("readingTranslate",["hash":key]){[weak self] response in
+                    guard let self=self else{return}
+                    if let result=response["data"] as? [String:Any],let translation=result["translation"] as? String {
+                        if let i=self.rows.firstIndex(where:{($0["evidenceHash"] as? String)==key}){self.rows[i]["translation"]=translation}
+                        if self.tabs.selectedSegment==0,self.rows.indices.contains(self.picker.indexOfSelectedItem),(self.rows[self.picker.indexOfSelectedItem]["evidenceHash"] as? String)==key{self.select();self.hint.stringValue="中文译文已保存在这篇手记下。"}
+                    }else{self.hint.stringValue="译文暂未生成；原文与手记仍在。稍后重新打开可再试。"}
+                }
+            }
             let data=try? Data(contentsOf:support.appendingPathComponent("reading-comments.json"))
             let comments=(data.flatMap{try? JSONSerialization.jsonObject(with:$0)} as? [[String:Any]]) ?? []
             for c in comments.filter({($0["hash"] as? String)==(r["evidenceHash"] as? String)}).prefix(8).reversed(){body.string+="\n\n你："+(c["comment"] as? String ?? "")+"\n露娜："+(c["reply"] as? String ?? "")}
