@@ -28,7 +28,7 @@ final class CompanionBubble:NSViewController {
         send.title="↑";send.frame=NSRect(x:290,y:39,width:32,height:28);send.isBordered=false;send.contentTintColor=NSColor(calibratedRed:0.82,green:0.75,blue:0.96,alpha:1);send.target=self;send.action=#selector(submit);root.addSubview(send)
         for (i,pair) in [("对话","chat"),("手记","notebook"),("抽签","fortune"),("Codex ↗","codex")].enumerated(){let b=LunaChip(title:pair.0,target:self,action:#selector(shortcut(_:)));b.identifier=NSUserInterfaceItemIdentifier(pair.1);b.isBordered=false;b.frame=NSRect(x:12+i*64,y:7,width:62,height:25);root.addSubview(b)}
         slider=NSSlider(value:Double(owner?.petSize ?? 220),minValue:140,maxValue:360,target:self,action:#selector(resize(_:)));slider.isContinuous=true
-        let tools=LunaChip(title:"•••",target:self,action:#selector(more(_:)));tools.isBordered=false;tools.frame=NSRect(x:286,y:7,width:40,height:25);root.addSubview(tools)
+        let tools=LunaChip(title:"更多",target:self,action:#selector(more(_:)));tools.isBordered=false;tools.frame=NSRect(x:286,y:7,width:40,height:25);root.addSubview(tools)
     }
     override func viewDidAppear(){super.viewDidAppear();view.window?.makeFirstResponder(input)}
     @objc func collapse(){owner?.popover.close()}

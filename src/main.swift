@@ -205,17 +205,14 @@ final class Guardian:NSObject,NSApplicationDelegate,CLLocationManagerDelegate,AV
         let m=NSMenu()
         func add(_ title:String,_ action:String,to menu:NSMenu){let i=NSMenuItem(title:title,action:#selector(menuAction(_:)),keyEquivalent:"");i.target=self;i.representedObject=action;menu.addItem(i)}
         add("☾ 和露娜说话","chat",to:m)
-        add("📖 读书感想","readingNotebook",to:m);add("电脑一览 · 自动照看","care",to:m)
-        let advanced=NSMenu()
         for (title,items) in [
-            ("今日陪伴",[("天气","weather"),("抽一支签","fortune"),("专注 25 分钟","focusStart"),("结束专注","focusStop")]),
-            ("桌面陪伴",[("仅观察刚才的应用","bindStudy"),("跟随当前窗口","followStudy"),("看看我在忙什么","studyOnce"),(studyEnabled ? "暂停桌面陪伴":"开启桌面陪伴","toggleStudy")]),
-            ("日常提醒",[("一起吃点东西","eat"),("日常提醒设置","routineSettings"),("已经吃过 / 休息过了","reminderDone"),("10分钟后提醒","reminderLater"),("今天不提醒","reminderSkip")]),
-            ("外观与声音",[("放大一点","larger"),("标准大小","standard"),("更通透","glassLight"),("更清晰","glassClear"),("缩小一点","smaller"),(muted ? "打开语音":"静音","toggleMute"),("挥挥手","wave")]),
-            ("手记与记忆",[("读书感想","readingNotebook"),("长期记忆","memoryNotebook"),("任务清单","taskNotebook")]),
-            ("位置与连接",[("使用系统定位","startLocation"),("暂停定位","stopLocation"),("固定大阪东淀川区","fixedLocation"),("LLM 连接设置","openModelSettings"),("打开 Tailscale","openTailscale"),("切换开机启动","toggleLogin")])
-        ] {let sub=NSMenu();for pair in items{add(pair.0,pair.1,to:sub)};let item=NSMenuItem(title:title,action:nil,keyEquivalent:"");item.submenu=sub;advanced.addItem(item)}
-        add("学习与 Mac 工具","tools",to:advanced);add("自主生活设置","world",to:advanced);add("复杂任务 → Codex","codex",to:advanced);let settings=NSMenuItem(title:"更多与设置",action:nil,keyEquivalent:"");settings.submenu=advanced;m.addItem(settings)
+            ("日常陪伴",[("看看天气","weather"),("抽一支签","fortune"),("一起吃点东西","eat"),("专注 25 分钟","focusStart"),("结束专注","focusStop"),("自主生活","world")]),
+            ("读书与任务",[("读书手记与留言","readingNotebook"),("长期记忆","memoryNotebook"),("任务清单","taskNotebook"),("文字与学习工具","tools")]),
+            ("电脑照看",[("电脑状态","care"),("照看红线","guardSettings")]),
+            ("模型与联网",[("LLM 服务与模型","openModelSettings"),("复杂任务交给 Codex","codex"),("打开 Tailscale","openTailscale")]),
+            ("外观与语音",[("放大一点","larger"),("标准大小","standard"),("缩小一点","smaller"),("气泡更通透","glassLight"),("气泡更清晰","glassClear"),(muted ? "打开语音":"静音","toggleMute")]),
+            ("系统设置",[(studyEnabled ? "暂停屏幕陪伴":"开启屏幕陪伴","toggleStudy"),("跟随当前窗口","followStudy"),("只看刚才的应用","bindStudy"),("日常提醒设置","routineSettings"),("使用系统定位","startLocation"),("暂停定位","stopLocation"),("固定大阪东淀川区","fixedLocation"),("切换开机启动","toggleLogin")])
+        ] {let sub=NSMenu();for pair in items{add(pair.0,pair.1,to:sub)};let item=NSMenuItem(title:title,action:nil,keyEquivalent:"");item.submenu=sub;m.addItem(item)}
         m.addItem(.separator());add("显示 / 隐藏露娜","togglePet",to:m);add("退出露娜","quit",to:m);return m
     }
     @objc func menuAction(_ sender:NSMenuItem){

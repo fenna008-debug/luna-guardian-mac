@@ -6,6 +6,7 @@ final class LunaNotebook:NSWindowController {
     let picker=NSPopUpButton(),body=NSTextView(),edit=NSTextField(),status=NSPopUpButton(),hint=NSTextField(labelWithString:"")
     let add=NSButton(title:"添加",target:nil,action:nil),change=NSButton(title:"保存修改",target:nil,action:nil),remove=NSButton(title:"删除",target:nil,action:nil),source=NSButton(title:"打开原文",target:nil,action:nil)
     var rows:[[String:Any]]=[]
+    var commentBusy=false
     var kind:String {tabs.selectedSegment==1 ? "memory":"task"}
     init(_ guardian:Guardian){
         self.guardian=guardian
@@ -26,7 +27,8 @@ final class LunaNotebook:NSWindowController {
     func show(_ section:Int=0){tabs.selectedSegment=section;reload();window?.makeKeyAndOrderFront(nil);NSApp.activate(ignoringOtherApps:true)}
     @objc func reload(){
         let section=tabs.selectedSegment
-        edit.isHidden=section==0 || section==3;status.isHidden=section != 2;add.isHidden=section==0 || section==3;change.isHidden=section==0 || section==3;remove.isHidden=section==0;source.isHidden=section != 0
+        edit.isHidden=section==3;status.isHidden=section != 2;add.isHidden=section==3;change.isHidden=section==0 || section==3;remove.isHidden=section==0;source.isHidden=section != 0
+        add.title=section==0 ? "给露娜留言":"添加";edit.placeholderString=section==0 ? "这段书或她的感想，你怎么看？":"写下想记住的事，或添加待办任务"
         remove.title=section==3 ? "清空记录":"删除"
         if section==0 {
             let data=try? Data(contentsOf:support.appendingPathComponent("reading-log.json"));rows=(data.flatMap{try? JSONSerialization.jsonObject(with:$0)} as? [[String:Any]]) ?? []
@@ -45,9 +47,22 @@ final class LunaNotebook:NSWindowController {
         if tabs.selectedSegment==0 {body.string=(r["title"] as? String ?? "")+"\n"+(r["scope"] as? String ?? "")+"\n\n露娜的感想\n"+(r["reflection"] as? String ?? "未生成")+"\n\n原文节选\n"+(r["quote"] as? String ?? "")+"\n\n来源\n"+(r["url"] as? String ?? "")}
         else if tabs.selectedSegment==3 {body.string=(r["tool"] as? String ?? "工具")+"\n结果："+(r["outcome"] as? String ?? "未知")+"\n耗时：\(r["seconds"] ?? 0) 秒\n时间："+DateFormatter.localizedString(from:Date(timeIntervalSince1970:r["at"] as? Double ?? 0),dateStyle:.medium,timeStyle:.medium)}
         else {edit.stringValue=r["text"] as? String ?? "";body.string=edit.stringValue;let values=["pending","in_progress","done"];status.selectItem(at:values.firstIndex(of:r["status"] as? String ?? "pending") ?? 0)}
+        if tabs.selectedSegment==0 {
+            let data=try? Data(contentsOf:support.appendingPathComponent("reading-comments.json"))
+            let comments=(data.flatMap{try? JSONSerialization.jsonObject(with:$0)} as? [[String:Any]]) ?? []
+            for c in comments.filter({($0["hash"] as? String)==(r["evidenceHash"] as? String)}).prefix(8).reversed(){body.string+="\n\n你："+(c["comment"] as? String ?? "")+"\n露娜："+(c["reply"] as? String ?? "")}
+        }
     }
     func mutate(_ op:String){var p:[String:Any]=["op":op,"kind":kind,"text":edit.stringValue];if op != "add" {guard rows.indices.contains(picker.indexOfSelectedItem) else{return};p["id"]=rows[picker.indexOfSelectedItem]["id"]};p["status"]=kind=="memory" ? "saved":["pending","in_progress","done"][max(0,status.indexOfSelectedItem)];guardian?.run("notebook",p){[weak self] r in if r["ok"] as? Bool==true{self?.reload()}else{self?.hint.stringValue=r["error"] as? String ?? "未保存"}}}
-    @objc func addItem(){mutate("add")}
+    @objc func addItem(){
+        guard tabs.selectedSegment==0 else{mutate("add");return}
+        guard !commentBusy,rows.indices.contains(picker.indexOfSelectedItem),!edit.stringValue.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty else{return}
+        commentBusy=true;add.isEnabled=false;hint.stringValue="留言已送给露娜，等她读一读…"
+        let text=edit.stringValue,key=rows[picker.indexOfSelectedItem]["evidenceHash"] as? String ?? ""
+        guardian?.run("readingComment",["hash":key,"comment":text]){[weak self] r in guard let self=self else{return};self.commentBusy=false;self.add.isEnabled=true
+            if r["ok"] as? Bool==true {self.edit.stringValue="";self.select();self.hint.stringValue="留言保存在这篇手记下。"}else{self.hint.stringValue=r["error"] as? String ?? "留言尚未保存"}
+        }
+    }
     @objc func updateItem(){mutate("update")}
     @objc func deleteItem(){if tabs.selectedSegment==3{writeJSON(["items":[]],"tool-events.json");reload()}else{mutate("delete")}}
     @objc func openSource(){guard rows.indices.contains(picker.indexOfSelectedItem),let raw=rows[picker.indexOfSelectedItem]["url"] as? String,let url=URL(string:raw),["http","https"].contains(url.scheme ?? "") else{return};NSWorkspace.shared.open(url)}

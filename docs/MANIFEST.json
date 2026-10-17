@@ -6,8 +6,8 @@
   },
   {
     "path": "README.md",
-    "sha256": "19882a47788581245091c40dc5b8f20b32180679e4720ea3f82d3a62541fc96f",
-    "bytes": 2385
+    "sha256": "410ab49cdb24e79fc432ba9e8e53e0dda961df76f5fd7612c836f5839f89c046",
+    "bytes": 2564
   },
   {
     "path": "assets/actions/daily.png",
@@ -91,8 +91,8 @@
   },
   {
     "path": "build.py",
-    "sha256": "ba614e9fcd58526500afe955699aff426f71318ef257b78428d14523ffff8edf",
-    "bytes": 2213
+    "sha256": "fa32f034f6a83f900ecd48fc3ecbcd8a93470210f9ef2e3b10484e5c2a5976a6",
+    "bytes": 2374
   },
   {
     "path": "docs/CONFIGURATION.md",
@@ -106,13 +106,13 @@
   },
   {
     "path": "docs/SCENARIOS.md",
-    "sha256": "ba62c77d75522737fc9dc26d56123dcf6c560ed788a3829283cbfbc390a6d9b5",
-    "bytes": 3512
+    "sha256": "e53cc05ddb596e560fb9656d9794aab679dd3b294a7d6c735884224fe197d34d",
+    "bytes": 3981
   },
   {
     "path": "docs/VERIFICATION.md",
-    "sha256": "94143c3bf62c707ad34d784a13c0f675bedd3da1e8e73eca961919e1b79f8624",
-    "bytes": 1811
+    "sha256": "4ee8e83ee9f28ef8b4f1ff07f1f7217806d65f01a95c019b78829176a569b811",
+    "bytes": 2415
   },
   {
     "path": "examples/model.example.json",
@@ -121,8 +121,8 @@
   },
   {
     "path": "src/Bubble.swift",
-    "sha256": "d70b8bba1d7a721072bbf3d6202cafa8fb0777620f686879f29bc91ec54fcb1d",
-    "bytes": 14357
+    "sha256": "1c7fee9d00cf32ddae4ebcb9033fef5e95ea60807d5cee9174f6cf2aa3ecc79c",
+    "bytes": 14354
   },
   {
     "path": "src/Center.swift",
@@ -156,8 +156,8 @@
   },
   {
     "path": "src/Notebook.swift",
-    "sha256": "c3b4dbe145446f5ea9068fa9e3ef8f65fb4488b10deb6d5cde2a7db338332bb3",
-    "bytes": 6777
+    "sha256": "94988b0b19c5e39f23b1ff326a0b617cb0ac3c236751317ca0b5cb444b5f2be0",
+    "bytes": 8253
   },
   {
     "path": "src/Scene.swift",
@@ -166,8 +166,8 @@
   },
   {
     "path": "src/backend.py",
-    "sha256": "a5fc66826f9e9b4149cc11ec6f229c9b098e62e3cefa91d98f639fdf6de1c9f2",
-    "bytes": 31785
+    "sha256": "66f937237ea313f1b0c08c59df19857cb32f4a1827b7fe613e7f01f8f9d86a41",
+    "bytes": 31877
   },
   {
     "path": "src/handoff.py",
@@ -181,8 +181,8 @@
   },
   {
     "path": "src/main.swift",
-    "sha256": "1aedf2828711536e34dbf2238e3f8c9a005f9f08e69e91720b8ed11556e939ad",
-    "bytes": 43898
+    "sha256": "978c723214536280035f3bad62a082dd25e5f4d3dda01dc09e2fe2a666f95758",
+    "bytes": 43483
   },
   {
     "path": "src/maintenance.py",
@@ -206,8 +206,8 @@
   },
   {
     "path": "src/reading.py",
-    "sha256": "3d634c4347e9c2e1e089b2c9f68d615e684739d0f79c5dfdc1615455bdba9f4e",
-    "bytes": 3528
+    "sha256": "9f3d302101550ca1214a0bef71209b78d024af812538cffe900fc4ab7b6fd758",
+    "bytes": 6495
   },
   {
     "path": "src/speech.py",
@@ -233,6 +233,11 @@
     "path": "src/test_notebook.py",
     "sha256": "3083187d48c86be108597c15e9b1b32f57dc0194946b76691243dc5c4b74e381",
     "bytes": 3053
+  },
+  {
+    "path": "src/test_reading.py",
+    "sha256": "94feea49c5f5128ceb27ecbc180fc20c0caaae898a1e4d1410937d9c8c298c10",
+    "bytes": 1599
   },
   {
     "path": "src/web_tools.py",

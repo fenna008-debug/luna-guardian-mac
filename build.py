@@ -6,7 +6,7 @@ ROOT=Path(__file__).resolve().parent
 assets=ROOT/'assets'
 if not (assets/'spritesheet.webp').exists() and (ROOT/'assets.zip').exists():
  with zipfile.ZipFile(ROOT/'assets.zip') as z:z.extractall(ROOT)
-app=ROOT/'dist/露娜电脑管家.app';contents=app/'Contents';resources=contents/'Resources';binary=contents/'MacOS'
+app=Path(os.environ.get('LUNA_BUILD_DIR',str(Path.home()/'Library/Caches/LunaGuardianBuild')))/'露娜电脑管家.app';contents=app/'Contents';resources=contents/'Resources';binary=contents/'MacOS'
 resources.mkdir(parents=True,exist_ok=True);binary.mkdir(exist_ok=True)
 swift=['main','Bubble','Glass','Guard','Fortune','Center','Life','Scene','Notebook']
 command=['nice','-n','15','swiftc']+[str(ROOT/'src'/f'{f}.swift') for f in swift]+['-o',str(binary/'LunaGuardian')]
@@ -19,4 +19,5 @@ info={'CFBundleDisplayName':'露娜电脑管家','CFBundleName':'露娜电脑管
 (contents/'Info.plist').write_bytes(plistlib.dumps(info))
 subprocess.run(['xattr','-cr',str(app)],check=True)
 subprocess.run(['codesign','--force','--deep','--sign','-',str(app)],check=True)
+subprocess.run(['codesign','--verify','--deep','--strict',str(app)],check=True)
 print(app)
