@@ -1,0 +1,6 @@
+name: luna_mac_bridge
+display_name: 露娜 Mac 微信桥接
+desc: 配对本人的微信，复用 Mac 露娜的人设、模型、长期记忆和待办。
+version: v0.1.0
+author: fenna008-debug
+repo: https://github.com/fenna008-debug/luna-guardian-mac

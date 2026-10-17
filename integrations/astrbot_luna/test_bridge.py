@@ -1,0 +1,132 @@
+"""Offline access-control tests; no real WeChat messages are sent."""
+
+import asyncio
+import hashlib
+import importlib.util
+import json
+import sys
+import tempfile
+import types
+import unittest
+from pathlib import Path
+from unittest.mock import AsyncMock, patch
+
+
+class Event:
+    def __init__(
+        self, message, sender="owner", platform="mac", group="", kind="weixin_oc"
+    ):
+        self.message_str, self.sender, self.platform = message, sender, platform
+        self.group, self.kind, self.stopped, self.sent = group, kind, False, []
+
+    def get_platform_name(self):
+        return self.kind
+
+    def get_platform_id(self):
+        return self.platform
+
+    def get_sender_id(self):
+        return self.sender
+
+    def get_group_id(self):
+        return self.group
+
+    def stop_event(self):
+        self.stopped = True
+
+    def plain_result(self, text):
+        return text
+
+    async def send(self, text):
+        self.sent.append(text)
+
+
+class BridgeTests(unittest.IsolatedAsyncioTestCase):
+    async def asyncSetUp(self):
+        fake_filter = types.SimpleNamespace(
+            EventMessageType=types.SimpleNamespace(ALL=1),
+            event_message_type=lambda *a, **k: lambda f: f,
+        )
+        modules = {
+            "astrbot.api.event": types.SimpleNamespace(
+                AstrMessageEvent=Event, filter=fake_filter
+            ),
+            "astrbot.api.star": types.SimpleNamespace(
+                Context=object, Star=object, StarTools=object
+            ),
+        }
+        spec = importlib.util.spec_from_file_location(
+            "tested_bridge", Path(__file__).with_name("main.py")
+        )
+        self.module = importlib.util.module_from_spec(spec)
+        with patch.dict(sys.modules, modules):
+            spec.loader.exec_module(self.module)
+        self.temp = tempfile.TemporaryDirectory()
+        self.bridge = self.module.LunaBridge.__new__(self.module.LunaBridge)
+        self.bridge.lock = asyncio.Lock()
+        self.bridge.state_path = Path(self.temp.name) / "owner.json"
+        self.bridge.state_path.write_text(
+            json.dumps({"pair_hash": hashlib.sha256(b"pair-test").hexdigest()})
+        )
+
+    async def asyncTearDown(self):
+        self.temp.cleanup()
+
+    async def test_unpaired_and_group_silent(self):
+        for e in [Event("hello"), Event("pair-test", group="group")]:
+            await self.bridge.incoming(e)
+            self.assertTrue(e.stopped)
+            self.assertEqual(e.sent, [])
+
+    async def test_pair_once_and_reject_other_sender_or_platform(self):
+        e = Event("pair-test")
+        await self.bridge.incoming(e)
+        self.assertEqual(len(e.sent), 1)
+        state = json.loads(self.bridge.state_path.read_text())
+        self.assertNotIn("pair_hash", state)
+        for e in [
+            Event("pair-test", sender="other"),
+            Event("hello", platform="windows"),
+        ]:
+            await self.bridge.incoming(e)
+            self.assertEqual(e.sent, [])
+
+    async def test_owner_reply_uses_worker_and_stops_pipeline(self):
+        await self.bridge.incoming(Event("pair-test"))
+        process = types.SimpleNamespace(
+            communicate=AsyncMock(return_value=(b'{"answer":"ok"}', b"")), returncode=0
+        )
+        with patch.object(
+            self.module.asyncio,
+            "create_subprocess_exec",
+            AsyncMock(return_value=process),
+        ):
+            e = Event("hello")
+            await self.bridge.incoming(e)
+        self.assertEqual(e.sent, ["ok"])
+        self.assertTrue(e.stopped)
+
+    async def test_bad_worker_output_is_safe(self):
+        await self.bridge.incoming(Event("pair-test"))
+        process = types.SimpleNamespace(
+            communicate=AsyncMock(return_value=(b"bad", b"private")), returncode=0
+        )
+        with patch.object(
+            self.module.asyncio,
+            "create_subprocess_exec",
+            AsyncMock(return_value=process),
+        ):
+            e = Event("hello")
+            await self.bridge.incoming(e)
+        self.assertEqual(len(e.sent), 1)
+        self.assertNotIn("private", e.sent[0])
+
+    async def test_other_platform_untouched(self):
+        e = Event("hello", kind="webchat")
+        await self.bridge.incoming(e)
+        self.assertFalse(e.stopped)
+        self.assertEqual(e.sent, [])
+
+
+if __name__ == "__main__":
+    unittest.main()
