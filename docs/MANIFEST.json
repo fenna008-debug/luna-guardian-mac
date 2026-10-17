@@ -1,0 +1,242 @@
+[
+  {
+    "path": ".gitignore",
+    "sha256": "7ba0f14d11a4d37f961f43d3875c1cac133e0686eb0fbd5d43846a1dd66af164",
+    "bytes": 210
+  },
+  {
+    "path": "README.md",
+    "sha256": "19882a47788581245091c40dc5b8f20b32180679e4720ea3f82d3a62541fc96f",
+    "bytes": 2385
+  },
+  {
+    "path": "assets/actions/daily.png",
+    "sha256": "82325896f94f6f47f82a18c8f1fb2188f87d9956e471581a5c514450d4ce0609",
+    "bytes": 2706850
+  },
+  {
+    "path": "assets/actions/fortune.png",
+    "sha256": "163923f2f5566ef5cea52bd1c005b028560908f70eab7b9f75de2322bb418441",
+    "bytes": 2198981
+  },
+  {
+    "path": "assets/actions/meal.png",
+    "sha256": "1055fdddc89d3c757e6ef43cc79b21c8bc2e984692c764bfb872931ee53168a9",
+    "bytes": 2216974
+  },
+  {
+    "path": "assets/actions/prompts.txt",
+    "sha256": "6d5ed777914bc039d8d36b7ea2ec4aed607634244642c165687621aab9f24146",
+    "bytes": 11222
+  },
+  {
+    "path": "assets/fortunes.json",
+    "sha256": "950967277d0e793abfc99d92c49db13001d77383c86a443751cc232f2f845075",
+    "bytes": 1861
+  },
+  {
+    "path": "assets/spritesheet.webp",
+    "sha256": "55ddef6fc4bdc11c557da7b3ac0fa221487d013fbe55aa93c0f87fde4a12d6e8",
+    "bytes": 2136266
+  },
+  {
+    "path": "assets/voices/captions.json",
+    "sha256": "495cded12907120b5fc930eb6f87a375683a6d70a8d1754719ec0bf0f38cfca6",
+    "bytes": 2009
+  },
+  {
+    "path": "assets/voices/cold.wav",
+    "sha256": "7baecbd8065d2852e5f6811449a8725d039b6ca09072352cfe20b8aa3cf39953",
+    "bytes": 256044
+  },
+  {
+    "path": "assets/voices/fortune_good.wav",
+    "sha256": "b01efe686111741d1a8afed31d64579fe5e57b6e972b013d0301cd52b16e2fe3",
+    "bytes": 458284
+  },
+  {
+    "path": "assets/voices/fortune_great.wav",
+    "sha256": "a928b4b57ecaa49f1f26066bbdd08ba1a42e47610ca952847707dd6ea75fd5f8",
+    "bytes": 409644
+  },
+  {
+    "path": "assets/voices/fortune_middle.wav",
+    "sha256": "af55e0f41ae178ee5c6c4d07655af18bd425cb2b6e03e7d8fe9775fbcd77b552",
+    "bytes": 381484
+  },
+  {
+    "path": "assets/voices/fortune_small.wav",
+    "sha256": "421587f4b2adef11bd7686fd262cb976bb579462e4629c2c7a74e004839a34be",
+    "bytes": 422444
+  },
+  {
+    "path": "assets/voices/hot.wav",
+    "sha256": "05c6421044631c01dab3bf5917e7d8ee118c3c98e75b17836248df6e55981e45",
+    "bytes": 304684
+  },
+  {
+    "path": "assets/voices/rain.wav",
+    "sha256": "569e3d5e4b087cd798be988ad4c501afce74658f1b524b3fb09c1e347d624d72",
+    "bytes": 345644
+  },
+  {
+    "path": "assets/voices/snow.wav",
+    "sha256": "3fed0e0f6d99f1c24463946b9268eca33989d37dbef7f4e2e0a7a6a83f0611be",
+    "bytes": 284204
+  },
+  {
+    "path": "assets/voices/storm.wav",
+    "sha256": "1283e68566d430518f31d93a46104283f8976023b182c96c33c9e79f852b7215",
+    "bytes": 371244
+  },
+  {
+    "path": "build.py",
+    "sha256": "ba614e9fcd58526500afe955699aff426f71318ef257b78428d14523ffff8edf",
+    "bytes": 2213
+  },
+  {
+    "path": "docs/CONFIGURATION.md",
+    "sha256": "db77bd63dea659c5ebd39a3a6e51e4c78760d440173bef5b8aaaaa06367a0341",
+    "bytes": 3462
+  },
+  {
+    "path": "docs/REFERENCES.md",
+    "sha256": "c936e6a1d43bab5a747ffdf00b70df471120a7433b51ddf20e8062bea62a003b",
+    "bytes": 635
+  },
+  {
+    "path": "docs/SCENARIOS.md",
+    "sha256": "ba62c77d75522737fc9dc26d56123dcf6c560ed788a3829283cbfbc390a6d9b5",
+    "bytes": 3512
+  },
+  {
+    "path": "docs/VERIFICATION.md",
+    "sha256": "94143c3bf62c707ad34d784a13c0f675bedd3da1e8e73eca961919e1b79f8624",
+    "bytes": 1811
+  },
+  {
+    "path": "examples/model.example.json",
+    "sha256": "163f989006b8200327be09c3342c22d6bd0256e34e8082c0474629961d5633f9",
+    "bytes": 72
+  },
+  {
+    "path": "src/Bubble.swift",
+    "sha256": "d70b8bba1d7a721072bbf3d6202cafa8fb0777620f686879f29bc91ec54fcb1d",
+    "bytes": 14357
+  },
+  {
+    "path": "src/Center.swift",
+    "sha256": "0a83580b09d2b23aee1126467c6425ec9131e9318d274cb64bf54e419c7a7ae3",
+    "bytes": 18343
+  },
+  {
+    "path": "src/ExportAnimation.swift",
+    "sha256": "78e73b6e5f25163407d50f49e279cad18ced385312bcb5caf8e453796d1c5c77",
+    "bytes": 7570
+  },
+  {
+    "path": "src/Fortune.swift",
+    "sha256": "814a7cb3491cc464810e2d5a862705e70b7314fe33bdb500ec94578d7aa944a9",
+    "bytes": 5370
+  },
+  {
+    "path": "src/Glass.swift",
+    "sha256": "38238612f2b9b026b5f5a85a539245d5a3eb9256bf17d917b1c1e9732ff5cf3d",
+    "bytes": 2037
+  },
+  {
+    "path": "src/Guard.swift",
+    "sha256": "2484ce2be03af61e7a63313f8a0a49b985ef92a8b20cd72f4f592e61e6cc01a9",
+    "bytes": 9006
+  },
+  {
+    "path": "src/Life.swift",
+    "sha256": "37c7cfcac250ebe7692be51401c295cf17c5d707ac7c5f463cc022b5a31b5545",
+    "bytes": 15497
+  },
+  {
+    "path": "src/Notebook.swift",
+    "sha256": "c3b4dbe145446f5ea9068fa9e3ef8f65fb4488b10deb6d5cde2a7db338332bb3",
+    "bytes": 6777
+  },
+  {
+    "path": "src/Scene.swift",
+    "sha256": "242f053200e741f959e52361db1147804349eb45b3336a9d6e8f7684e7f6b152",
+    "bytes": 5079
+  },
+  {
+    "path": "src/backend.py",
+    "sha256": "a5fc66826f9e9b4149cc11ec6f229c9b098e62e3cefa91d98f639fdf6de1c9f2",
+    "bytes": 31785
+  },
+  {
+    "path": "src/handoff.py",
+    "sha256": "30adef52585089da0630c1896210596717c11e433b96e1e9297c41b99d050b0a",
+    "bytes": 3539
+  },
+  {
+    "path": "src/index.html",
+    "sha256": "0248b7a9da862a0f65eabd7571a58b4b2a0dc94112805299e296303ef25bfd8d",
+    "bytes": 22382
+  },
+  {
+    "path": "src/main.swift",
+    "sha256": "1aedf2828711536e34dbf2238e3f8c9a005f9f08e69e91720b8ed11556e939ad",
+    "bytes": 43898
+  },
+  {
+    "path": "src/maintenance.py",
+    "sha256": "3c9ff4c8a1aadf8d2a22fb3d30469e5700e09bee07eb6904fcc2d84cc5d8e0af",
+    "bytes": 745
+  },
+  {
+    "path": "src/make_voices.py",
+    "sha256": "13d9a85403ce18737cd4ea197722d45f93f7d1a7faa9b5a9fba0e5eff486d740",
+    "bytes": 1463
+  },
+  {
+    "path": "src/notebook.py",
+    "sha256": "bcc485c206802024da28819cc02f9fdbc07ca24e0ee33ab4beca6dbe9dc8c74c",
+    "bytes": 2620
+  },
+  {
+    "path": "src/persona_luna.txt",
+    "sha256": "5187bfbfd4cd66989c5daabe356e01f5b2710aee885a4515edff352d26d1e0bf",
+    "bytes": 2538
+  },
+  {
+    "path": "src/reading.py",
+    "sha256": "3d634c4347e9c2e1e089b2c9f68d615e684739d0f79c5dfdc1615455bdba9f4e",
+    "bytes": 3528
+  },
+  {
+    "path": "src/speech.py",
+    "sha256": "193d0aad83a5f32b61ab25c57b7607a971ed034be4275a0bffdaae0b4cac8b50",
+    "bytes": 1808
+  },
+  {
+    "path": "src/synthesize_once.py",
+    "sha256": "669dbe014575451a115135e954cc308b6a543b3a950c3a4d39a8f30cde25556b",
+    "bytes": 1834
+  },
+  {
+    "path": "src/test_backend.py",
+    "sha256": "32b884e092f08074339b898f1f7d5574a14c9645861b37a91d7ebe6bef105d89",
+    "bytes": 11004
+  },
+  {
+    "path": "src/test_handoff.py",
+    "sha256": "7d37fc377fad60a7d06168002c6077ed459b0b5a8dfcbc02155c999e19efe0e6",
+    "bytes": 1779
+  },
+  {
+    "path": "src/test_notebook.py",
+    "sha256": "3083187d48c86be108597c15e9b1b32f57dc0194946b76691243dc5c4b74e381",
+    "bytes": 3053
+  },
+  {
+    "path": "src/web_tools.py",
+    "sha256": "d9570cbce3047352fd506aff959ea5333a7c0a38f59c03bbfc4e7bb903858b2a",
+    "bytes": 1079
+  }
+]
