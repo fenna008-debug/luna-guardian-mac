@@ -16,7 +16,7 @@ open "$HOME/Library/Caches/LunaGuardianBuild/露娜电脑管家.app"
 
 右键桌宠 → **模型与联网 → LLM 服务与模型**，填写 Base URL、模型 ID 和可选 API Key。支持 OpenAI Chat Completions 兼容接口，可连接 Qwen、DeepSeek、OpenAI 兼容服务、LM Studio、Ollama 兼容入口等；只支持其他原生协议的服务需先通过兼容网关。输入 `/v1` 基址或完整 `/chat/completions` URL，不要求所有供应商使用同一个模型名。
 
-修改配置后下次请求立即生效。同地址留空保留密钥；改地址清除旧密钥；本地无认证接口可以不填密钥。原生 Responses/Anthropic 协议目前未实现。Codex 为独立操作入口，不会因普通聊天服务故障而偷偷代答。
+修改配置后下次请求立即生效。同地址留空保留密钥；改地址清除旧密钥；本地无认证接口可以不填密钥。原生 Responses/Anthropic 协议目前未实现。Codex 为独立操作入口，不会因普通聊天服务故障而偷偷代答。点击桌宠的“Codex任务”即可直接后台提交，结果回到聊天框；“停止”可取消任务。当前采用官方 `codex exec --json`，不是向正在打开的桌面聊天注入消息。
 
 ## 内容索引
 

@@ -23,3 +23,10 @@
 ## 1.9.0 上传验证
 
 57 项 Python 回归测试通过，包括新增的旧版记忆迁移、调用版本追踪、凌晨4点阅读清理和工具文本过滤。更新后的 build.py 包含 Daily.swift，已完整构建并通过签名验证。界面与播放验证、跨日限制见 [更新说明](UPDATE-1.9.0.md)。
+
+
+## Direct Codex entry and QQ health snapshot (2026-10-18)
+
+66 desktop Python tests and 17 bridge tests passed. Native Swift build and signature validation passed. A real background Codex job created and reread a receipt file; the native pet entry delivered a separate real completion into chat without opening Codex UI. Native immediate cancellation prevented a queued submission; runner cancellation tests verified a running child is terminated before a cancelled receipt is recorded.
+
+The QQ paired-owner handler was exercised locally through its real worker, returning live system metrics to a mocked QQ event. This is not a claim that a new QQ network message was sent during the test. Worker files are loaded per request, so the installed bridge picks up the update without a bot restart. Only read-only snapshots are exposed remotely. No machine metrics, owner identifiers, credentials or logs are included in this repository.

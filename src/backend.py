@@ -272,6 +272,10 @@ def _routed_chat(message):
   value=re.sub(r'^(?:请)?(?:记住|记一下|记下来)[：:，, ]?','',message).strip();r=manage(BASE,{'kind':'memory','op':'add','text':value,'source':'你在聊天中明确要求保存：'+message});return recorded('我记下了：'+value+'。可以在“记忆”里修改或删除。')
  if re.match(r'^(?:添加|新增|记个|记一个)(?:任务|待办)[：:，, ]?',message):
   value=re.sub(r'^(?:添加|新增|记个|记一个)(?:任务|待办)[：:，, ]?','',message).strip();r=manage(BASE,{'kind':'task','op':'add','text':value,'source':'你在聊天中明确要求保存：'+message});return recorded('已加入待办：'+value+'。还没有执行。')
+ explicit=bool(re.search(r'(?:交给|调用|使用|让)\s*codex',message,re.I)) and not re.search(r'不要|不用|别',message)
+ if explicit:
+  from handoff import submit
+  result=submit(BASE,message,'用户明确指定 Codex');return recorded(result['answer']) | {'handoff':result['handoff']}
  if re.search(r'天气|会下雨|气温|带伞',message) and not re.search(r'代码|编程|安装|修复|打开',message):
   data=weather();prompt='用户问：'+message+'。以下是实际取得的所配置城市天气，明确报告城市及日期；若用户问其他城市，不能冒充对应天气。根据数据简短回答，不编造，附来源 https://open-meteo.com/ 。数据：'+json.dumps(data,ensure_ascii=False)
   try:answer=chat(prompt,remember=False,timeout=25)['answer']
@@ -291,10 +295,6 @@ def _routed_chat(message):
  if matched:
   done=subprocess.run(['/usr/bin/open','-a',appmap[matched.group(1)]],capture_output=True,timeout=8)
   return recorded('已请求打开'+matched.group(1)+'。' if done.returncode==0 else '应用没有成功打开。')
- explicit=bool(re.search(r'(?:交给|调用|使用|让)\s*codex',message,re.I)) and not re.search(r'不要|不用|别',message)
- if explicit:
-  from handoff import submit
-  result=submit(BASE,message,'用户明确指定 Codex');return recorded(result['answer']) | {'handoff':result['handoff']}
  candidate=bool(re.search(r'编程|代码|安装|部署|修复|排查|批量|重构',message)) and bool(re.search(r'帮|请|能不能|可以|替我|给我',message))
  if not candidate:return chat(message)
  prompt='判断用户是否明确要求执行电脑操作、创建保存文件、联网检索或编程任务，而非闲聊、解释、建议、假设、否定或询问能力。露娜只能普通对话；需要这些工具的明确行动请求交给Codex。只有高难度、多步骤的编程、修复、安装或批量操作才能交接；查天气、搜索、读书、时间、普通聊天不能交接。仅返回JSON，is_action和needs_tools必须为布尔值，complexity只能为high或low，reason为简短中文。用户消息：'+str(message)[:8000]
@@ -382,6 +382,14 @@ def voice_line(p):
  return {'ja':ja,'zh':zh}
 
 def dispatch(a,p):
+ if a=='codexSubmit':
+  from handoff import submit
+  result=submit(BASE,p.get('message',''),'用户在露娜任务入口明确提交')
+  past=read('chat.json',[]);past.extend([{'role':'user','text':p['message']},{'role':'assistant','text':result['answer']}]);save('chat.json',past[-100:])
+  return result
+ if a=='codexCancel':
+  from handoff import cancel
+  return cancel(BASE)
  if a=='repoWatch':
   from github_watch import tick
   return tick(read,save)

@@ -9,3 +9,8 @@
 本次参考：
 - AAAAGENT：https://github.com/phoiex/AAAAGENT — 借鉴来源可追踪的记忆、过期回应失效和执行状态分离思路；本次实现为本项目 Swift/Python 代码，没有引入其运行时或复制其代码。该项目使用非商业及署名许可，不能按 MIT 项目对待。
 - luna-sama：https://github.com/annali07/luna-sama — 参考自然简短的角色台词和本地日语语音方向；保留现有语音流程，不上传模型权重。
+
+
+## Direct Codex dispatch (2026-10-18)
+
+Reviewed [AAAAGENT by phoiex and contributors](https://github.com/phoiex/AAAAGENT), especially `code/desktop-pet/harness/codex-app.ts`: its existing-App thread dispatch uses a version-pinned private IPC protocol. Luna does not copy or use that protocol. Its independently implemented direct entry uses [official non-interactive Codex](https://learn.chatgpt.com/docs/non-interactive-mode) and JSONL events, retaining bounded workspace-write permissions and truthful completion/cancellation receipts. Reference project license: [AAAAGENT Noncommercial and Attribution License 1.0](https://github.com/phoiex/AAAAGENT/blob/main/LICENSE).

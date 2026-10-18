@@ -318,11 +318,11 @@ final class Guardian:NSObject,NSApplicationDelegate,CLLocationManagerDelegate,AV
         if visibleTaskID==id{companion.receive("task",card)}
     }
     func run(_ action:String,_ payload:[String:Any]=[:],completion:@escaping([String:Any])->Void){
-        let queue=action=="metrics" ? monitorQueue:action=="speak" ? voiceQueue:["chat","assist","study"].contains(action) ? interactionQueue:workerQueue
+        let queue=["metrics","codexCancel"].contains(action) ? monitorQueue:action=="speak" ? voiceQueue:["chat","assist","study","codexSubmit"].contains(action) ? interactionQueue:workerQueue
         guard queue.operationCount<4 else{completion(["ok":false,"error":"我正忙着处理前面的事，请稍等一下。"]);return}
         if action=="notebook",let op=payload["op"] as? String,op != "list"{cancelCurrentTurn()}
         let token=turnGeneration,observation=observationGeneration,ident=UUID(),started=Date()
-        let scoped=["chat","study","voiceLine","speak"].contains(action)
+        let scoped=["chat","study","voiceLine","speak","codexSubmit"].contains(action)
         let titles=["chat":"回应你的消息","assist":"学习工具处理","scan":"扫描旧缓存","clean":"移入恢复区","restore":"恢复文件","security":"检查系统保护","notebook":"读取或保存手记","weather":"查询天气"]
         let title=titles[action]
         if let title=title{taskCard(ident.uuidString,title,"进行中")}
@@ -343,7 +343,10 @@ final class Guardian:NSObject,NSApplicationDelegate,CLLocationManagerDelegate,AV
             }catch{result=["ok":false,"error":error.localizedDescription]}
             DispatchQueue.main.async{
                 self.scopedProcesses.removeValue(forKey:ident)
-                if !valid(){result=["ok":false,"cancelled":true,"error":"本次回应已取消，旧内容不会继续播放。"]}
+                if !valid(){
+                    if action=="codexSubmit",let data=result["data"] as? [String:Any],let handoff=data["handoff"] as? [String:Any],let job=handoff["id"] as? String,job.range(of:"^[a-f0-9]{32}$",options:.regularExpression) != nil{writeJSON(["requested":Date().timeIntervalSince1970],"codex-jobs/"+job+"/cancel.json")}
+                    result=["ok":false,"cancelled":true,"error":"本次回应已取消，旧内容不会继续播放。"]
+                }
                 if let title=title{self.taskCard(ident.uuidString,title,result["cancelled"] as? Bool==true ? "已取消":result["ok"] as? Bool==true ? "已完成":"未完成："+(result["error"] as? String ?? "未知原因"),Date().timeIntervalSince(started))}
                 completion(result)
             }
@@ -373,17 +376,19 @@ final class Guardian:NSObject,NSApplicationDelegate,CLLocationManagerDelegate,AV
     func pollHandoff(){
         guard Date().timeIntervalSince(lastHandoffPoll)>5 else{return};lastHandoffPoll=Date()
         let d=readJSON("codex-status.json"),id=d["id"] as? String ?? "",state=d["state"] as? String ?? ""
-        guard !id.isEmpty else{return};let token=id+state;guard token != lastHandoffToken else{return};lastHandoffToken=token
-        if state=="running"{companion.hint.stringValue="Codex 正在处理 · 露娜仍可聊天"}
-        if ["completed","failed"].contains(state),UserDefaults.standard.string(forKey:"lastHandoffDelivered") != token{
-            UserDefaults.standard.set(token,forKey:"lastHandoffDelivered")
+        guard !id.isEmpty else{return};let token=id+state+(d["summary"] as? String ?? "");guard token != lastHandoffToken else{return};lastHandoffToken=token
+        let title="Codex 后台任务",seconds=Date().timeIntervalSince1970-(d["started"] as? Double ?? d["created"] as? Double ?? Date().timeIntervalSince1970)
+        if ["queued","running"].contains(state){taskCard("codex-"+id,title,"进行中",seconds);companion.hint.stringValue=d["summary"] as? String ?? "Codex 正在处理"}
+        else{visibleTaskID="codex-"+id;taskCard("codex-"+id,title,state=="completed" ? "已完成":state=="cancelled" ? "已取消":"未完成",seconds)}
+        if ["completed","failed","cancelled"].contains(state),UserDefaults.standard.string(forKey:"lastHandoffDelivered") != id+state{
+            UserDefaults.standard.set(id+state,forKey:"lastHandoffDelivered")
             let summary=d["summary"] as? String ?? "没有收到结果"
-            companion.messages+="露娜\nCodex \(state=="completed" ? "已返回结果":"未完成")：\n\(summary)\n\n"
+            if !companion.messages.contains(summary){companion.messages+="露娜\nCodex \(state=="completed" ? "已返回结果":"未完成")：\n\(summary)\n\n"}
             if companion.isViewLoaded && !companion.chatBusy{companion.showChat()}
             petView.say(state=="completed" ? "Codex把结果带回来了。点我就能看。":"Codex这次没能完成。点我查看原因。",seconds:14)
         }
     }
-    func routeCodex(_ prompt:String){if !prompt.isEmpty{NSPasteboard.general.clearContents();NSPasteboard.general.setString(prompt,forType:.string);event("toast",["text":"任务已复制。到 Codex 粘贴后发送即可。"])};let ownerURL=fm.homeDirectoryForCurrentUser.appendingPathComponent("Library/Application Support/LunaCompanionMac/voice-bridge/owner.json");let owner=(try? Data(contentsOf:ownerURL)).flatMap{try? JSONSerialization.jsonObject(with:$0) as? [String:Any]};if let thread=owner?["thread"] as? String,UUID(uuidString:thread) != nil,let url=URL(string:"codex://threads/"+thread){NSWorkspace.shared.open(url)}else{NSWorkspace.shared.openApplication(at:URL(fileURLWithPath:"/Applications/ChatGPT.app"),configuration:NSWorkspace.OpenConfiguration(),completionHandler:nil)}}
+    func routeCodex(_ prompt:String){if !popover.isShown{showDashboard()};if prompt.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty{companion.showCodex()}else{companion.submitCodex(prompt)}}
     func tickFocus(){pollHandoff();guard let end=focusEnd else{return};let n=max(0,Int(end.timeIntervalSinceNow));event("focus",["time":String(format:"%02d:%02d",n/60,n%60),"text":n>0 ? "露娜正在陪你专心。":"这一轮完成了，休息一下吧。"]);if n==0{focusEnd=nil;animate("happy",text:"这一轮完成了。做得不错，起来活动一下吧。",seconds:10)}}
     func settings(){event("settings",["muted":muted,"watch":watching,"login":fm.fileExists(atPath:loginPath.path)])}
     var loginPath:URL{fm.homeDirectoryForCurrentUser.appendingPathComponent("Library/LaunchAgents/local.luna.lunaguardian.plist")}
@@ -515,7 +520,7 @@ final class Guardian:NSObject,NSApplicationDelegate,CLLocationManagerDelegate,AV
         case "openTailscale":let app=URL(fileURLWithPath:"/Applications/Tailscale.app");if fm.fileExists(atPath:app.path){NSWorkspace.shared.openApplication(at:app,configuration:NSWorkspace.OpenConfiguration(),completionHandler:nil)}else{NSWorkspace.shared.open(URL(string:"https://tailscale.com/download/mac")!)};reply(id,[:])
         case "openModelSettings":modelSettings();reply(id,[:])
         case "quit":reply(id,[:]);quit()
-        case "scan","clean","restore","security","chat","history","chatHistory","modelConfig","guardReports","guardConfig","weather":
+        case "codexSubmit","codexCancel","scan","clean","restore","security","chat","history","chatHistory","modelConfig","guardReports","guardConfig","weather":
             if action=="scan" && resourceLimited{reply(id,"电脑正在轻量照看模式，暂不启动扫描。",ok:false);return};if ["scan","clean","restore"].contains(action){guard !jobBusy else{reply(id,"另一个整理任务还在进行。",ok:false);return};jobBusy=true;p["active"]=NSWorkspace.shared.runningApplications.compactMap{$0.bundleIdentifier};let text=action=="scan" ? "又积了些灰？我先检查一下，别急着全扔。":action=="clean" ? "好吧，我来扫。重要的东西可别混进去。":"把东西放回原处，也是一门功夫。";animate(action=="scan" ? "scan":"clean",text:text)}
             if action=="chat"{cancelCurrentTurn();life?.lastTouch=Date();life?.stopWalking();animate("chat");petView.say("嗯，我在听。")}
             run(action,p){[weak self] r in guard let self=self else{return};if ["scan","clean","restore"].contains(action){self.jobBusy=false;self.animate(r["ok"] as? Bool==true ? "happy":"surprise",text:r["ok"] as? Bool==true ? "这一步完成了，结果在清单里。":"这一步没有完成，先看看提示。",seconds:5)};if action=="chat",r["cancelled"] as? Bool != true{if self.notebook?.window?.isVisible==true,self.notebook?.tabs.selectedSegment==1{self.notebook?.reload()};self.animate("wave",seconds:4);if let d=r["data"] as? [String:Any],let answer=d["answer"] as? String{self.maybeSpeak(answer)}};if action=="weather",let d=r["data"] as? [String:Any]{self.handleWeather(d)};self.reply(id,r["data"] ?? r["error"] ?? "未知结果",ok:r["ok"] as? Bool ?? false)}

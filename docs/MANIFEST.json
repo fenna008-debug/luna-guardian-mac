@@ -6,8 +6,8 @@
   },
   {
     "path": "README.md",
-    "sha256": "6058edfc8ff8234b6ff5b134787a0e8be13aff84545633990e218538de7d340c",
-    "bytes": 4716
+    "sha256": "6a2228a82a80d8c12d629e61d5cf8419ff40a164f1c51bf779a292ae1b5c4927",
+    "bytes": 4921
   },
   {
     "path": "assets/actions/daily.png",
@@ -101,8 +101,8 @@
   },
   {
     "path": "docs/REFERENCES.md",
-    "sha256": "d015b8d668e749d9d509542d45e0a163dadc35c61c74aecf875d30a7ebf032ff",
-    "bytes": 1120
+    "sha256": "79ebdc1ba9c33f23a4a0a7e1bf7ccf2f01053a0c113460cf2d0789473b60ea9b",
+    "bytes": 1795
   },
   {
     "path": "docs/SCENARIOS.md",
@@ -121,8 +121,8 @@
   },
   {
     "path": "docs/VERIFICATION.md",
-    "sha256": "1f153b661bdda601bc3401816bea9a29b00d08eb70c1c1cad793be4a3500f5aa",
-    "bytes": 3311
+    "sha256": "8e7c34cc0ebcf3125f2d7ad09c10714a33f3ef402c37776c66aec610d79b3524",
+    "bytes": 4246
   },
   {
     "path": "examples/model.example.json",
@@ -131,8 +131,13 @@
   },
   {
     "path": "integrations/astrbot_luna/README.md",
-    "sha256": "be1d79b06a5f6f9835e66ae9bd46260b9a548e687c669790cb8ae5f03ffd5d26",
-    "bytes": 3576
+    "sha256": "92de5bff15921901e435d46f6459a934e5fe208a0e104372094bd68521b88805",
+    "bytes": 3758
+  },
+  {
+    "path": "integrations/astrbot_luna/computer_status.py",
+    "sha256": "5fc60ce5b8cdb1c578cab00482864d0c08645a6d2f22ae69a8f359206897e0fe",
+    "bytes": 3129
   },
   {
     "path": "integrations/astrbot_luna/main.py",
@@ -170,19 +175,24 @@
     "bytes": 4860
   },
   {
+    "path": "integrations/astrbot_luna/test_computer_status.py",
+    "sha256": "93d47ec9429f75a0e8a8baf19dfe508a39ad2d3d2997fd52bd413e1afebc2b9c",
+    "bytes": 2172
+  },
+  {
     "path": "integrations/astrbot_luna/test_media.py",
     "sha256": "6d10df2ba2d37021c57c2df705ad15e208326b20e87b1dc84eb4b1bed1281a30",
     "bytes": 3850
   },
   {
     "path": "integrations/astrbot_luna/worker.py",
-    "sha256": "a6472df4142bc155ee597a78a19835798839b751bc7c40ffa7828edbfbdcfc77",
-    "bytes": 3258
+    "sha256": "56346fd2408f64a98544efcd8366a0244a6930f3ee0381dd60d9f0919da3987d",
+    "bytes": 3397
   },
   {
     "path": "src/Bubble.swift",
-    "sha256": "99ac804171a29ed64fbeea69a6ae5afc989adeca03922a1b79dbbcd14ff84521",
-    "bytes": 17134
+    "sha256": "42978f8f7a39c9b233d71a3e77a2d78ecf5b07432cafc629b90332c7a62855c6",
+    "bytes": 18222
   },
   {
     "path": "src/Center.swift",
@@ -231,8 +241,8 @@
   },
   {
     "path": "src/backend.py",
-    "sha256": "2ed3741e4cee48c4d3bf5a15c443379804c695c6abf5ec3eef2b930206381315",
-    "bytes": 34212
+    "sha256": "0863fbeb786f76b98f67a15fbf6f9564eaec781a74e95208fb671ea7868d3ac6",
+    "bytes": 34590
   },
   {
     "path": "src/github_watch.py",
@@ -241,8 +251,8 @@
   },
   {
     "path": "src/handoff.py",
-    "sha256": "30adef52585089da0630c1896210596717c11e433b96e1e9297c41b99d050b0a",
-    "bytes": 3539
+    "sha256": "3f8b2b308bc6be63bb1ae0235c8474c245af2fef06dfe34048120bd907195d41",
+    "bytes": 5368
   },
   {
     "path": "src/index.html",
@@ -251,8 +261,8 @@
   },
   {
     "path": "src/main.swift",
-    "sha256": "d32e978e906f21cd8d3ba74a464d4b6bb15d7fe2be6c228f3920564e7cd0b0fc",
-    "bytes": 54331
+    "sha256": "8dc651a0ce6ffbd6a8e62898561f4f7b5f29eb576a834255fc22ac2760d48c3b",
+    "bytes": 54655
   },
   {
     "path": "src/maintenance.py",
@@ -306,8 +316,8 @@
   },
   {
     "path": "src/test_handoff.py",
-    "sha256": "7d37fc377fad60a7d06168002c6077ed459b0b5a8dfcbc02155c999e19efe0e6",
-    "bytes": 1779
+    "sha256": "3c2f66185e2bfe9c34819f8580fe48152035fe76e51871d6b8c532d89db6f4df",
+    "bytes": 5500
   },
   {
     "path": "src/test_notebook.py",

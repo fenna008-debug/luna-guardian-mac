@@ -7,6 +7,9 @@ from pathlib import Path
 
 
 def respond(message):
+    from computer_status import requested, report
+    if requested(message):
+        return report()
     resources = Path("/Applications/露娜电脑管家.app/Contents/Resources")
     sys.path.insert(0, str(resources))
     import backend
@@ -43,7 +46,7 @@ def respond(message):
         message,
         re.I,
     ):
-        return "远程入口现在支持聊天、记忆、待办和天气；操作电脑的事情请回到 Mac 桌宠交给我。"
+        return "远程入口支持实际检查电脑状态、聊天、记忆、待办和天气；修改文件或设置请在 Mac 桌宠的“Codex任务”里提交。"
     if re.search(r"天气|会下雨|气温|带伞", message):
         data = backend.weather()
         current = data["current"]
