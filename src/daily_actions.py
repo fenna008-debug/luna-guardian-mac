@@ -1,9 +1,32 @@
 """Bounded local filename lookup, never follows links or opens file contents."""
-import os,re,time
+import os,re,time,subprocess
 from pathlib import Path
 
 def find_files(query,roots=None,limit=12):
-    roots=roots or [Path.home()/n for n in ('Desktop','Documents','Downloads')]
+    if roots is None:
+        terms=[x.casefold() for x in query.split() if x]
+        if not terms:return [],False
+        hits=[];partial=False
+        for name in ('Downloads','Desktop','Documents'):
+            root=Path.home()/name
+            try:
+                result=subprocess.run(['/usr/bin/mdfind','-onlyin',str(root),'-name',query],capture_output=True,text=True,timeout=2)
+            except (OSError,subprocess.TimeoutExpired):partial=True;continue
+            if result.returncode:partial=True;continue
+            candidates=result.stdout.splitlines()
+            try:
+                direct=subprocess.run(['/bin/ls','-1',str(root)],capture_output=True,text=True,timeout=2)
+                if direct.returncode==0:candidates.extend(str(root/n) for n in direct.stdout.splitlines())
+                else:partial=True
+            except (OSError,subprocess.TimeoutExpired):partial=True
+            for value in candidates:
+                path=Path(value)
+                try:relative=path.relative_to(root)
+                except ValueError:continue
+                if any(p.startswith('.') or p in ('node_modules','venv','Codex','__pycache__') for p in relative.parts):continue
+                if all(t in path.name.casefold() for t in terms) and value not in hits:hits.append(value)
+                if len(hits)>=limit:return hits,True
+        return hits,partial
     terms=[x.casefold() for x in query.split() if x]
     if not terms:return [],False
     hits=[];seen=0;deadline=time.monotonic()+4;partial=False
@@ -27,8 +50,8 @@ def handle(message,base,runner):
         if not query:return '告诉我文件名里有什么字，例如“找文件：课表”。我会查桌面、文稿和下载。'
         if len(query)>100:return '文件名关键词太长了，请给我一两个关键词。'
         hits,partial=find_files(query)
-        if not hits:return '在桌面、文稿和下载的本次查找范围内，没有找到文件名包含“'+query+'”的文件。可以换一个关键词。'
-        return '找到这些文件（只查文件名，尚未打开）：\n'+'\n'.join(hits)+('\n结果或查找范围已截断，可以加关键词缩小范围。' if partial else '')
+        if not hits:return '在桌面、文稿和下载的已索引文件中，没有找到文件名包含“'+query+'”的文件。未被系统索引的文件可能查不到，可以换一个关键词。'
+        return '找到这些文件或文件夹（只查名称，尚未打开）：\n'+'\n'.join(hits)+('\n结果或查找范围已截断，可以加关键词缩小范围。' if partial else '')
     if re.fullmatch(r'(?:请|帮我)?(?:播放音乐|放首歌|放点音乐|听歌|播放网易云音乐)',m):
         result=runner(['/usr/bin/open','-a','NeteaseMusic'],capture_output=True,text=True,timeout=15)
         return '已请求打开网易云音乐。目前还无法确认播放器已经开始播放，请先在播放器选歌。' if result.returncode==0 else '网易云音乐没有打开成功，尚未播放。'

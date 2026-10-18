@@ -17,3 +17,10 @@ class ControlsTests(unittest.TestCase):
   with tempfile.TemporaryDirectory() as d:
    p=Path(d);(p/'课表.xls').write_text('');(p/'circle').symlink_to(p,target_is_directory=True)
    hits,partial=find_files('课表',[p]);self.assertEqual(hits,[str(p/'课表.xls')]);self.assertFalse(partial)
+
+ def test_index_timeout_is_bounded(self):
+  from unittest.mock import patch
+  import subprocess
+  with patch('daily_actions.subprocess.run',side_effect=subprocess.TimeoutExpired('mdfind',2)) as run:
+   self.assertEqual(find_files('missing'),([],True));self.assertEqual(run.call_count,3)
+   self.assertTrue(all(c.kwargs['timeout']==2 for c in run.call_args_list))
