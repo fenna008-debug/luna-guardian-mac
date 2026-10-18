@@ -407,7 +407,10 @@ final class Guardian:NSObject,NSApplicationDelegate,CLLocationManagerDelegate,AV
         let task=DispatchWorkItem{[weak self] in guard let self=self,self.studyEnabled else{return};self.study(manual:false)}
         studyDebounce=task;DispatchQueue.main.asyncAfter(deadline:.now()+8,execute:task)
     }
+    var captureSessionBlocked=false
     func study(manual:Bool){
+        if captureSessionBlocked && !manual{return}
+        if manual{captureSessionBlocked=false}
         if !manual && !studyEnabled{return}
         if !manual && (Date().timeIntervalSince(lastAutoStudy)<15 || Date().timeIntervalSince(lastScreenReply)<45){event("study",["status":"等待下一次检查 · 发言间隔至少45秒"]);return}
         guard !criticalMode,!studyBusy,!companion.chatBusy,!fortuneBusy,!isLocked() else{event("study",["status":isLocked() ? "锁屏中，暂停观察":companion.chatBusy ? "正在和你聊天，暂停观察":studyBusy ? "上一轮观察处理中":criticalMode ? "内存压力较高，观察暂缓":fortuneBusy ? "抽签动画进行中，稍后观察":"后台任务处理中（\(workerQueue.operationCount)项），稍后观察"]);return}
@@ -431,10 +434,10 @@ final class Guardian:NSObject,NSApplicationDelegate,CLLocationManagerDelegate,AV
         event("study",["status":"正在读取当前窗口","app":app.localizedName ?? "应用","manual":manual])
         SCShareableContent.getExcludingDesktopWindows(true,onScreenWindowsOnly:true){[weak self] content,error in
             guard let self=self else{return}
-            guard let windows=content?.windows,let window=windows.first(where:{$0.owningApplication?.processID==app.processIdentifier && $0.windowID==windowID}) else{DispatchQueue.main.async{self.studyBusy=false;self.event("study",["status":"没有取得可读窗口："+(error?.localizedDescription ?? "窗口不可见"),"app":app.localizedName ?? ""])};return}
+            guard let windows=content?.windows,let window=windows.first(where:{$0.owningApplication?.processID==app.processIdentifier && $0.windowID==windowID}) else{DispatchQueue.main.async{self.studyBusy=false;if error != nil{self.captureSessionBlocked=true};self.event("study",["status":"观察已暂停，可手动重试。没有取得可读窗口："+(error?.localizedDescription ?? "窗口不可见"),"app":app.localizedName ?? ""])};return}
             let config=SCStreamConfiguration();let scale=min(1.5,1600/window.frame.width);config.width=Int(window.frame.width*scale);config.height=Int(window.frame.height*scale);config.showsCursor=false
             SCScreenshotManager.captureImage(contentFilter:SCContentFilter(desktopIndependentWindow:window),configuration:config){[weak self] image,error in
-                guard let self=self else{return};guard let image=image else{DispatchQueue.main.async{self.studyBusy=false;self.event("study",["status":"截图未成功："+(error?.localizedDescription ?? "未知原因")])};return}
+                guard let self=self else{return};guard let image=image else{DispatchQueue.main.async{self.studyBusy=false;self.captureSessionBlocked=true;self.event("study",["status":"观察已暂停，可手动重试。截图未成功："+(error?.localizedDescription ?? "未知原因")])};return}
                 self.recognizeScreen(image,app:app,manual:manual,observation:observation)
             }
         }

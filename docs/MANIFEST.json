@@ -281,8 +281,8 @@
   },
   {
     "path": "src/main.swift",
-    "sha256": "2d7e6c148f735b625c847573f4d4b9db11a957ff922a1ce499a02a5ff59e5d2b",
-    "bytes": 54778
+    "sha256": "0d966a0c24da035d02c5bb306c81fd969a003e2970d3d5731d8f41ed399d63b8",
+    "bytes": 55066
   },
   {
     "path": "src/maintenance.py",
