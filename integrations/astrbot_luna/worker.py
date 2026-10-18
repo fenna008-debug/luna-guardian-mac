@@ -11,6 +11,13 @@ def _respond(message, request_id=""):
     sys.path.insert(0, str(resources))
     import backend
 
+    if re.search(r'(?:记住|记到|记在|保存到|存到).*(?:记忆|课表)|(?:这是|刚才|这个).*(?:记住|记一下)',message):
+        document=backend.read('remote-last-document.json',{})
+        if __import__('time').time()-document.get('at',0)<86400 and document.get('text'):
+            from notebook import manage
+            for offset in range(0,min(len(document['text']),12000),1400):
+                manage(backend.BASE,{'kind':'memory','op':'add','text':document['text'][offset:offset+1400],'source':'你明确要求保存的最近QQ附件正文，第'+str(offset//1400+1)+'段：'+document.get('scope','')})
+            return '已经把刚才实际读到的附件内容写入长期记忆。可以在手记里核对。'
     from remote_actions import handle
     action = handle(message, backend, request_id)
     if action is not None:

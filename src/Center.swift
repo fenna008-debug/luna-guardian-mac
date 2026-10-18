@@ -6,7 +6,7 @@ import UniformTypeIdentifiers
 
 final class CareCenter:NSWindowController {
     weak var guardian:Guardian?
-    let tabs=NSSegmentedControl(labels:["电脑一览","学习工具","露娜的小世界","照看记录"],trackingMode:.selectOne,target:nil,action:nil)
+    let tabs=NSSegmentedControl(labels:["电脑一览","学习工具","露娜的小世界","照看记录","后台管理"],trackingMode:.selectOne,target:nil,action:nil)
     let page=NSView(),summary=NSTextField(labelWithString:"正在读取电脑状态…"),subtitle=NSTextField(labelWithString:""),details=NSTextView(),input=NSTextView(),output=NSTextView(),task=NSPopUpButton(),toolStatus=NSTextField(labelWithString:""),lifeTitle=NSTextField(labelWithString:"")
     let taskKinds=["translate_zh","translate_ja","polish_ja","summary","research","plan","explain"]
     var taskBusy=false,coffee:Process?,resultText="",cards:[NSTextField]=[]
@@ -50,6 +50,20 @@ final class CareCenter:NSWindowController {
             textArea(details,NSRect(x:0,y:132,width:652,height:237))
             button(guardian?.life?.enabled==true ? "暂停自主日常":"恢复自主日常","lifeToggle",NSRect(x:0,y:80,width:150,height:32));button("一起专注","focus",NSRect(x:164,y:80,width:140,height:32));button("聊一会儿","chat",NSRect(x:318,y:80,width:140,height:32));button("摸摸头","pat",NSRect(x:472,y:80,width:180,height:32))
             label("本地反应每 15 秒观察一次 · LLM 最多每 2 分钟规划一次 · 主动气泡至少间隔 4 分钟",NSRect(x:0,y:20,width:652,height:44),size:12);refreshLife()
+        case 4:
+            label("露娜正在做什么",NSRect(x:0,y:510,width:652,height:30),size:22,color:.labelColor)
+            let o=guardian
+            let speech=o?.voicePaused==true ? "暂停十五分钟内" : o?.muted==true ? "已静音" : "可用"
+            let observation=readJSON("screen-observation.json")["status"] as? String ?? "尚无观察回执"
+            textArea(details,NSRect(x:0,y:180,width:652,height:300))
+            details.font = .systemFont(ofSize:16)
+            details.string="语音："+speech+"\n\n窗口观察："+observation+"\n\n电脑巡检："+(o?.watching==true ? "开启":"暂停")+"\n\n聊天："+(o?.companion.chatBusy==true ? "正在回应":"空闲")+"\n\n课程提醒：露娜运行且电脑未锁屏时检查。具体任务结果可在任务记录查看。"
+            button(o?.voicePaused==true ? "恢复语音":"暂停语音 15 分钟","pauseVoice",NSRect(x:0,y:124,width:180,height:32))
+            button("开始新话题","newTopic",NSRect(x:194,y:124,width:140,height:32))
+            button("任务记录","taskNotebook",NSRect(x:348,y:124,width:140,height:32))
+            button("刷新状态","background",NSRect(x:502,y:124,width:150,height:32))
+            button(o?.studyEnabled==true ? "暂停窗口观察":"开启窗口观察","observe",NSRect(x:0,y:74,width:180,height:32))
+            label("开始新话题会归档当前聊天；保留长期记忆、运势和正在执行的任务。",NSRect(x:0,y:16,width:652,height:40))
         default:
             label("异常发生后，她做了什么",NSRect(x:0,y:510,width:652,height:30),size:22,color:.labelColor)
             label("待复检 → 仍需处理 / 已缓解。保留观察证据，不把尝试处理写成修复成功。",NSRect(x:0,y:469,width:652,height:30))
@@ -77,6 +91,11 @@ final class CareCenter:NSWindowController {
     func checkConnection(){guard !connectionBusy,Date().timeIntervalSince(lastConnection)>10 else{return};connectionBusy=true;guardian?.run("connection"){[weak self] r in guard let self=self else{return};self.connectionBusy=false;self.lastConnection=Date();self.connection=(r["data"] as? [String:Any])?["message"] as? String ?? "连接诊断暂不可用";if self.tabs.selectedSegment==0{self.render()}}}
     func explain(){guard let d=guardian?.lastMetrics,!d.isEmpty else{return};let safe:[String:Any]=["cpu":d["cpu"] ?? "未知","memoryPressure":d["memoryPressure"] ?? "未知","diskFree":d["diskFree"] ?? "未知","battery":d["battery"] ?? "未知","time":d["time"] ?? "未知","chip":d["chip"] ?? "未知"];input.string=String(data:(try? JSONSerialization.data(withJSONObject:safe,options:.prettyPrinted)) ?? Data(),encoding:.utf8) ?? "";show(1);task.selectItem(at:6);toolStatus.stringValue="已放入数值快照。点击开始处理，交给 LLM 解释。"}
     @objc func action(_ sender:NSButton){switch sender.identifier?.rawValue ?? "" {
+        case "pauseVoice":guardian?.setVoicePause(guardian?.voicePaused != true);render()
+        case "newTopic":guardian?.startNewTopic();window?.orderOut(nil)
+        case "taskNotebook":guardian?.showNotebook(2)
+        case "background":render()
+        case "observe":guardian?.nativeCall("toggleStudy"){[weak self] _ in self?.render()}
         case "refresh":guardian?.refreshMetrics();refreshMetrics()
         case "threshold":guardian?.guardSettings()
         case "activity":NSWorkspace.shared.openApplication(at:URL(fileURLWithPath:"/System/Applications/Utilities/Activity Monitor.app"),configuration:NSWorkspace.OpenConfiguration())

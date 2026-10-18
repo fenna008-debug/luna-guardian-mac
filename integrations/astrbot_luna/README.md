@@ -27,3 +27,7 @@ Real QQ text reply, audio attachment reception/transcription, and outgoing text-
 Run `python -m unittest discover -s integrations/astrbot_luna -p 'test_*.py'` using the dedicated environment.
 
 Official setup: https://github.com/AstrBotDevs/AstrBot/wiki/zh-platform-qqofficial-websockets
+
+## Daily assistant additions
+
+See [daily assistant update](../../docs/UPDATE-DAILY-ASSISTANT.md) for local actions, new topics, temporary speech pause, supported extra file types and current music limitations. Build the file OCR helper with `swiftc FileOCR.swift -o LunaFileOCR -framework Vision -framework ImageIO -framework AppKit` and place it beside the plugin Python sources. Install the current requirements in the AstrBot environment. The helper reads only the supplied image file and does not require screen-recording permission.

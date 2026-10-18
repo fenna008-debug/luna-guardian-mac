@@ -53,7 +53,7 @@ class BridgeTests(unittest.IsolatedAsyncioTestCase):
         modules = {
             "tested_bridge.media": types.SimpleNamespace(receive=AsyncMock()),
             "astrbot.api.message_components": types.SimpleNamespace(
-                File=type("File", (), {}), Record=type("Record", (), {})
+                File=type("File", (), {}), Record=type("Record", (), {}), Image=type("Image", (), {})
             ),
             "astrbot.core.utils.astrbot_path": types.SimpleNamespace(
                 get_astrbot_temp_path=lambda: "/tmp"

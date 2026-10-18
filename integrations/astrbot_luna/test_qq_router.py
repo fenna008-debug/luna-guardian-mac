@@ -4,7 +4,7 @@ from unittest.mock import Mock
 sys.path.insert(0,str(Path(__file__).resolve().parents[2]/'src'))
 from qq_router import prepare
 class IntentTests(unittest.TestCase):
- def model(self,**kw):return Mock(return_value={'answer':json.dumps(dict(route='task',is_action=True,needs_tools=True,confidence=.96,**kw))})
+ def model(self,**kw):return Mock(return_value={'answer':json.dumps(dict(route='task',is_action=True,needs_tools=True,confidence=.96,complexity='high',**kw))})
  def test_contextual_task(self):
   chat=self.model();r=prepare('那就按刚才说的做',[{'role':'user','text':'按课表安排提醒'}],chat)
   self.assertIn('课表',r['task']);self.assertIn('那就',r['task'])

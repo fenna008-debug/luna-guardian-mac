@@ -74,6 +74,7 @@ class MediaTests(unittest.IsolatedAsyncioTestCase):
     def test_model_failure_returns_real_extracted_text(self):
         fake = types.ModuleType("backend")
         fake.read = lambda name, default: default
+        fake.save = Mock()
         fake.chat = Mock(side_effect=ValueError("provider timeout"))
         with (
             tempfile.TemporaryDirectory() as folder,

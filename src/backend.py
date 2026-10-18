@@ -264,6 +264,12 @@ def _routed_chat(message):
  # Called only for actual human chat; OCR, reading and voice never enter here.
  def recorded(answer):
   rows=read('chat.json',[]);rows.extend([{'role':'user','text':message},{'role':'assistant','text':answer}]);save('chat.json',rows[-100:]);return {'answer':answer}
+ if re.search(r'课表|上课时间|课程提醒|提醒时间',message) and not re.search(r'修改|调整|安排|设置',message):
+  from course_schedule import summary
+  return recorded(summary(BASE))
+ from local_actions import handle as local_handle
+ local_result=local_handle(message,BASE)
+ if local_result is not None:return recorded(local_result)
  from notebook import manage,remember_region
  region=remember_region(BASE,message)
  if region:
@@ -304,7 +310,9 @@ def _routed_chat(message):
   result=submit(BASE,plan['task'],plan['reason'])
   return recorded(result['answer']) | {'handoff':result.get('handoff')}
 
- return chat(message)
+ result=chat(message)
+ if re.search(r"(?:已|已经).{0,8}(?:交接|转交|提交|派发)",result["answer"]) and re.search("codex",result["answer"],re.I):result["answer"]="这件事还没有实际提交，不能算已经执行。请告诉我具体要完成什么。"
+ return result
 
 def routed_chat(message):
  started=time.monotonic();outcome='失败'
@@ -379,6 +387,13 @@ def voice_line(p):
  return {'ja':ja,'zh':zh}
 
 def dispatch(a,p):
+ if a=='newTopic':
+  from session_controls import new_topic
+  return {'answer':new_topic(BASE)}
+ if a=='courseTick':
+  from course_schedule import tick
+  return tick(BASE,str(p.get('app','')))
+
  if a=='codexSubmit':
   from handoff import submit
   result=submit(BASE,p.get('message',''),'用户在露娜任务入口明确提交')

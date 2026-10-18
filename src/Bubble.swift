@@ -1,9 +1,9 @@
 // All everyday interactions live beside the pet, in a native speech bubble.
 import AppKit
-final class LunaCard:NSVisualEffectView {
-    override init(frame:NSRect){super.init(frame:frame);material = .hudWindow;blendingMode = .behindWindow;state = .active;appearance=NSAppearance(named:.darkAqua);wantsLayer=true;layer?.cornerRadius=20;layer?.masksToBounds=true;layer?.borderWidth=0.7;layer?.borderColor=NSColor.white.withAlphaComponent(0.18).cgColor}
+final class LunaCard:NSView {
+    override init(frame:NSRect){super.init(frame:frame);appearance=NSAppearance(named:.darkAqua);wantsLayer=true;layer?.cornerRadius=20;layer?.masksToBounds=true;layer?.borderWidth=0.7;layer?.borderColor=NSColor.white.withAlphaComponent(0.18).cgColor}
     required init?(coder:NSCoder){fatalError()}
-    var solid=false
+    var solid=true
     override func draw(_ rect:NSRect){super.draw(rect);if solid{NSColor(calibratedRed:0.12,green:0.12,blue:0.16,alpha:1).setFill();bounds.fill();return};NSColor(calibratedRed:0.44,green:0.38,blue:0.56,alpha:0.08).setFill();bounds.fill()}
 }
 final class CompanionBubble:NSViewController {
@@ -23,15 +23,15 @@ final class CompanionBubble:NSViewController {
         let root=LunaCard(frame:NSRect(x:0,y:0,width:340,height:380));view=root
         let title=NSTextField(labelWithString:"☾  L U N A");title.font = .systemFont(ofSize:12,weight:.medium);title.textColor=NSColor.white.withAlphaComponent(0.85);title.frame=NSRect(x:18,y:350,width:200,height:18);root.addSubview(title)
         let close=LunaChip(title:"×",target:self,action:#selector(collapse));close.isBordered=false;close.frame=NSRect(x:302,y:346,width:24,height:26);root.addSubview(close)
-        hint.font = .systemFont(ofSize:10);hint.textColor=NSColor.white.withAlphaComponent(0.5);hint.frame=NSRect(x:18,y:330,width:305,height:16);root.addSubview(hint)
+        hint.font = .systemFont(ofSize:12);hint.textColor=NSColor.white.withAlphaComponent(0.8);hint.frame=NSRect(x:18,y:330,width:305,height:16);root.addSubview(hint)
         fortuneBanner.font = .systemFont(ofSize:11,weight:.medium);fortuneBanner.textColor=NSColor(calibratedRed:0.93,green:0.83,blue:0.61,alpha:1);fortuneBanner.frame=NSRect(x:18,y:281,width:304,height:44);fortuneBanner.maximumNumberOfLines=2;root.addSubview(fortuneBanner);refreshFortuneBanner()
         scroll.frame=NSRect(x:12,y:115,width:316,height:160);scroll.hasVerticalScroller=true;scroll.scrollerStyle = .overlay;scroll.borderType = .noBorder;scroll.drawsBackground=false;root.addSubview(scroll)
-        transcript.isEditable=false;transcript.isSelectable=true;transcript.isRichText=false;transcript.font = .systemFont(ofSize:13);transcript.textColor=NSColor.white.withAlphaComponent(0.9);transcript.drawsBackground=false;transcript.textContainerInset=NSSize(width:6,height:8);transcript.autoresizingMask = [.width];transcript.isVerticallyResizable=true;transcript.isHorizontallyResizable=false;transcript.textContainer?.widthTracksTextView=true;transcript.frame=NSRect(x:0,y:0,width:300,height:160);scroll.documentView=transcript;render(messages)
+        transcript.isEditable=false;transcript.isSelectable=true;transcript.isRichText=false;transcript.font = .systemFont(ofSize:16);transcript.textColor=NSColor.white.withAlphaComponent(1);transcript.drawsBackground=false;transcript.textContainerInset=NSSize(width:6,height:8);transcript.autoresizingMask = [.width];transcript.isVerticallyResizable=true;transcript.isHorizontallyResizable=false;transcript.textContainer?.widthTracksTextView=true;transcript.frame=NSRect(x:0,y:0,width:300,height:160);scroll.documentView=transcript;render(messages)
         let line=NSBox(frame:NSRect(x:18,y:76,width:304,height:1));line.boxType = .separator;line.alphaValue=0.25;root.addSubview(line)
-        input.frame=NSRect(x:18,y:40,width:262,height:27);input.placeholderString="和我说说…";input.isBordered=false;input.drawsBackground=false;input.focusRingType = .none;input.textColor = .white;input.font = .systemFont(ofSize:13);input.target=self;input.action=#selector(submit);root.addSubview(input)
+        input.frame=NSRect(x:18,y:40,width:262,height:27);input.placeholderString="和我说说…";input.isBordered=false;input.drawsBackground=false;input.focusRingType = .none;input.textColor = .white;input.font = .systemFont(ofSize:16);input.target=self;input.action=#selector(submit);root.addSubview(input)
         send.title="↑";send.frame=NSRect(x:290,y:39,width:32,height:28);send.isBordered=false;send.contentTintColor=NSColor(calibratedRed:0.82,green:0.75,blue:0.96,alpha:1);send.target=self;send.action=#selector(submit);root.addSubview(send)
         for (i,pair) in [("对话","chat"),("手记","notebook"),("抽签","fortune")].enumerated(){let b=LunaChip(title:pair.0,target:self,action:#selector(shortcut(_:)));b.identifier=NSUserInterfaceItemIdentifier(pair.1);b.isBordered=false;b.frame=NSRect(x:14+i*80,y:7,width:72,height:25);root.addSubview(b)}
-        observationStatus.frame=NSRect(x:18,y:87,width:304,height:22);observationStatus.font = .systemFont(ofSize:10);observationStatus.isBordered=false;observationStatus.alignment = .left;observationStatus.target=self;observationStatus.action=#selector(showObservation);root.addSubview(observationStatus)
+        observationStatus.frame=NSRect(x:18,y:87,width:304,height:22);observationStatus.font = .systemFont(ofSize:12);observationStatus.isBordered=false;observationStatus.alignment = .left;observationStatus.target=self;observationStatus.action=#selector(showObservation);root.addSubview(observationStatus)
         let stop=NSButton(title:"停止",target:self,action:#selector(cancelReply));stop.frame=NSRect(x:244,y:345,width:50,height:24);stop.isBordered=false;root.addSubview(stop)
         let prior=readJSON("screen-observation.json");observationStatus.title="观察："+(prior["status"] as? String ?? "等待检查")
         slider=NSSlider(value:Double(owner?.petSize ?? 220),minValue:140,maxValue:360,target:self,action:#selector(resize(_:)));slider.isContinuous=true
@@ -52,22 +52,21 @@ final class CompanionBubble:NSViewController {
     @objc func more(_ sender:NSButton){owner?.makeMenu().popUp(positioning:nil,at:NSPoint(x:sender.frame.minX,y:sender.frame.minY),in:view)}
     func updateSurface(){
         guard isViewLoaded,let card=view as? LunaCard else{return}
-        let chat=mode=="chat" || mode.hasPrefix("露娜 ·")
-        card.solid = !chat;card.state = chat ? .active:.inactive;card.needsDisplay=true
-        let saved=UserDefaults.standard.double(forKey:"glassAlpha")
-        owner?.popover.alphaValue=chat ? (saved>0 ? saved:0.90):1
+        card.solid = true;card.needsDisplay=true
+        owner?.popover.alphaValue=1
     }
     func text(_ value:String,title:String="露娜"){refreshFortuneBanner();mode=title;updateSurface();scroll.documentView=transcript;render(value);transcript.scrollRangeToVisible(NSRange(location:0,length:0));hint.stringValue=title;send.title="↑";input.isHidden=false;send.isHidden=false}
     func render(_ value:String){
-        let paragraph=NSMutableParagraphStyle();paragraph.lineSpacing=5;paragraph.paragraphSpacing=7
-        let a=NSMutableAttributedString(string:value,attributes:[.font:NSFont.systemFont(ofSize:13),.foregroundColor:NSColor.white.withAlphaComponent(0.9),.paragraphStyle:paragraph])
+        let paragraph=NSMutableParagraphStyle();paragraph.lineSpacing=4;paragraph.paragraphSpacing=4
+        let a=NSMutableAttributedString(string:value,attributes:[.font:NSFont.systemFont(ofSize:16),.foregroundColor:NSColor.white.withAlphaComponent(1),.paragraphStyle:paragraph])
         let ns=value as NSString
-        for name in ["露娜", "你", "连接提示"] {let pattern="(?m)^"+name+"$";if let regex=try? NSRegularExpression(pattern:pattern){for match in regex.matches(in:value,range:NSRange(location:0,length:ns.length)){a.addAttributes([.font:NSFont.systemFont(ofSize:11,weight:.semibold),.foregroundColor:NSColor(calibratedRed:0.81,green:0.73,blue:0.95,alpha:1)],range:match.range)}}}
+        for name in ["露娜", "你", "连接提示"] {let pattern="(?m)^"+name+"$";if let regex=try? NSRegularExpression(pattern:pattern){for match in regex.matches(in:value,range:NSRange(location:0,length:ns.length)){a.addAttributes([.font:NSFont.systemFont(ofSize:13,weight:.semibold),.foregroundColor:NSColor(calibratedRed:0.81,green:0.73,blue:0.95,alpha:1)],range:match.range)}}}
         transcript.textStorage?.setAttributedString(a)
     }
     func showChat(){input.placeholderString="和我说说…";text(messages,title:"露娜 · 回车发送");mode="chat";transcript.scrollToEndOfDocument(nil)}
     @objc func shortcut(_ sender:NSButton){let action=sender.identifier?.rawValue ?? "chat";if action=="chat"{showChat()}else{perform(action)}}
     @objc func submit(){let s=input.stringValue.trimmingCharacters(in:.whitespacesAndNewlines);guard !s.isEmpty else{return};input.stringValue="";let commands=["天气":"weather","抽签":"fortune","扫描":"scan","清理":"scan","专注":"focusStart","停止专注":"focusStop","系统状态":"metrics","保护状态":"security","恢复":"restore","codex":"codex","语音测试":"voiceTest"]
+        if ["新话题","开始新话题","开启新话题","换个话题","清空当前对话"].contains(s){owner?.startNewTopic();return}
         if let command=commands[s.lowercased()]{perform(command);return};chatBusy=true;chatRequest=UUID();let request=chatRequest;send.isEnabled=true;messages+="你\n\(s)\n\n";showChat();hint.stringValue="露娜正在想…";requestStarted=Date();waitTimer?.invalidate();waitTimer=Timer.scheduledTimer(withTimeInterval:1,repeats:true){[weak self]_ in guard let self=self,self.chatBusy else{return};let seconds=Int(Date().timeIntervalSince(self.requestStarted));self.hint.stringValue=seconds<15 ? "露娜正在想 · \(seconds)秒":"等待服务回复 · \(seconds)秒 · 超时会提示"}
         owner?.nativeCall("chat",["message":s]){[weak self] r in guard let self=self,self.chatRequest==request else{return};self.chatBusy=false;self.waitTimer?.invalidate();self.send.isEnabled=true;if let d=r["data"] as? [String:Any],let answer=d["answer"] as? String{self.messages+="露娜\n\(answer)\n\n"}else{self.messages+="连接提示\n\(r["error"] as? String ?? "未收到回复")\n\n";self.input.stringValue=s};if self.messages.count>24000{self.messages=String(self.messages.suffix(18000))};self.showChat()}
     }

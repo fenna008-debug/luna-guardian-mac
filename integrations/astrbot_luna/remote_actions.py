@@ -34,6 +34,12 @@ def command(message, backend):
     base=backend.BASE
     m=message.strip().rstrip('。！!')
     if m in ('帮助','菜单','功能','功能菜单','你能做什么','QQ功能','qq功能'):return HELP
+    if re.search(r'课表|上课时间|课程提醒|提醒时间',m) and not re.search(r'修改|调整|安排|设置',m):
+        from course_schedule import summary
+        return summary(base)
+    from local_actions import handle as local_handle
+    local_result=local_handle(m,base,'qq')
+    if local_result is not None:return local_result
     from qq_router import prepare
     def delegate(plan):
         if plan.get('question'):return plan['question']

@@ -44,7 +44,8 @@ def extract(path):
             text = raw.decode("gb18030")
         scope = "文本内容"
     else:
-        raise ValueError("这个格式暂不支持阅读。")
+        from extra_files import extract_extra
+        text,scope=extract_extra(path)
     if not text.strip() or (suffix == ".pdf" and len(text.strip()) < 40):
         raise ValueError("没有取得足够正文；扫描 PDF 请先转成可复制文字的 PDF。")
     return text[:12000], scope + ("；截取前 12000 字" if len(text) > 12000 else "")
@@ -74,6 +75,7 @@ def process(request):
     job = Path(request["job"])
     if action == "file":
         text, scope = extract(Path(request["path"]))
+        backend.save("remote-last-document.json", {"text":text,"scope":scope,"at":__import__("time").time()})
         question = str(
             request.get("message") or "请总结这份文件，说明重点和需要核对的地方。"
         )[:2000]
@@ -128,6 +130,8 @@ def process(request):
             raise ValueError("没有听清这段语音，请再说一次或发文字。")
         return {"transcript": text}
     if action == "voice":
+        from session_controls import paused
+        if paused(backend.BASE):return {"error":"语音已暂停，文字回复保留。"}
         from qq_voice import synthesize
 
         if request.get("diagnostic") is True:

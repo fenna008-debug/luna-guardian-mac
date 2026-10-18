@@ -1,4 +1,5 @@
 import AppKit
+private var lastCourseCheck=Date.distantPast
 
 func lunaDay(_ date:Date=Date())->String {
     let f=DateFormatter();f.locale=Locale(identifier:"en_US_POSIX");f.timeZone=TimeZone(identifier:"Asia/Tokyo");f.dateFormat="yyyy-MM-dd"
@@ -14,6 +15,19 @@ extension Guardian {
         return row
     }
     func tickDailyPresentation(){
+        if voicePaused{audio?.stop();audioTask?.terminate()}
+        if Date().timeIntervalSince(lastCourseCheck)>20,!isLocked(),!companion.chatBusy,!fortuneBusy {
+            lastCourseCheck=Date()
+            run("courseTick",["app":NSWorkspace.shared.frontmostApplication?.localizedName ?? ""]){[weak self] r in
+                guard let self=self,let d=r["data"] as? [String:Any],let text=d["text"] as? String,!self.isLocked() else{return}
+                let warning=d["kind"] as? String=="warn"
+                self.animate(warning ? "surprise":"wave",seconds:4)
+                if warning{DispatchQueue.main.asyncAfter(deadline:.now()+4){[weak self] in self?.animate("tap",seconds:9)}}
+                self.petView.say(text,seconds:18)
+                self.companion.messages+="露娜 · 课程提醒\n"+text+"\n\n"
+                if self.popover.isShown{self.companion.showChat()}
+            }
+        }
         if readingDay != lunaDay(){
             let day=lunaDay();readingDay=day
             run("pruneReading"){[weak self] r in

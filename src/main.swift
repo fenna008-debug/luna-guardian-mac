@@ -163,7 +163,7 @@ final class Guardian:NSObject,NSApplicationDelegate,CLLocationManagerDelegate,AV
         try? fm.createDirectory(at:support,withIntermediateDirectories:true)
         writeJSON(["screenCaptureGranted":CGPreflightScreenCaptureAccess(),"checkedAt":Date().timeIntervalSince1970],"capabilities.json")
         muted=UserDefaults.standard.bool(forKey:"muted");studyEnabled = UserDefaults.standard.object(forKey:"studyPaused") != nil && !UserDefaults.standard.bool(forKey:"studyPaused")
-        let opacity=UserDefaults.standard.double(forKey:"glassAlpha");popover.alphaValue=opacity>0 ? opacity:0.90
+        popover.alphaValue=1
         monitorQueue.maxConcurrentOperationCount=1;monitorQueue.qualityOfService = .utility
         workerQueue.maxConcurrentOperationCount=1
         workerQueue.qualityOfService = .utility
@@ -249,12 +249,15 @@ final class Guardian:NSObject,NSApplicationDelegate,CLLocationManagerDelegate,AV
         let m=NSMenu()
         func add(_ title:String,_ action:String,to menu:NSMenu){let i=NSMenuItem(title:title,action:#selector(menuAction(_:)),keyEquivalent:"");i.target=self;i.representedObject=action;menu.addItem(i)}
         add("☾ 和露娜说话","chat",to:m)
+        add("开始新话题","newTopic",to:m)
+        add(voicePaused ? "恢复语音":"暂停语音 15 分钟","pauseVoice",to:m)
+        add("后台管理","background",to:m)
         for (title,items) in [
             ("日常陪伴",[("看看天气","weather"),("抽一支签","fortune"),("一起吃点东西","eat"),("专注 25 分钟","focusStart"),("结束专注","focusStop"),("自主生活","world")]),
             ("读书与任务",[("读书手记与留言","readingNotebook"),("长期记忆","memoryNotebook"),("任务清单","taskNotebook"),("文字与学习工具","tools")]),
             ("电脑照看",[("电脑状态","care"),("照看红线","guardSettings")]),
             ("模型与联网",[("LLM 服务与模型","openModelSettings"),("交代一件事","codex"),("打开 Tailscale","openTailscale")]),
-            ("外观与语音",[("放大一点","larger"),("标准大小","standard"),("缩小一点","smaller"),("气泡更通透","glassLight"),("气泡更清晰","glassClear"),(muted ? "打开语音":"静音","toggleMute")]),
+            ("外观与语音",[("放大一点","larger"),("标准大小","standard"),("缩小一点","smaller"),(muted ? "打开语音":"静音","toggleMute")]),
             ("系统设置",[(studyEnabled ? "暂停屏幕陪伴":"开启屏幕陪伴","toggleStudy"),("跟随当前窗口","followStudy"),("只看刚才的应用","bindStudy"),("日常提醒设置","routineSettings"),("使用系统定位","startLocation"),("暂停定位","stopLocation"),("固定大阪东淀川区","fixedLocation"),("切换开机启动","toggleLogin")])
         ] {let sub=NSMenu();for pair in items{add(pair.0,pair.1,to:sub)};let item=NSMenuItem(title:title,action:nil,keyEquivalent:"");item.submenu=sub;m.addItem(item)}
         m.addItem(.separator());add("显示 / 隐藏露娜","togglePet",to:m);add("退出露娜","quit",to:m);return m
@@ -262,6 +265,9 @@ final class Guardian:NSObject,NSApplicationDelegate,CLLocationManagerDelegate,AV
     @objc func menuAction(_ sender:NSMenuItem){
         guard let action=sender.representedObject as? String else{return}
         switch action {
+        case "newTopic":startNewTopic()
+        case "pauseVoice":setVoicePause(!voicePaused)
+        case "background":openCenter(4)
         case "care":openCenter()
         case "tools":openCenter(1)
         case "world":openCenter(2)
@@ -304,6 +310,21 @@ final class Guardian:NSObject,NSApplicationDelegate,CLLocationManagerDelegate,AV
         observationGeneration=UUID();observedWindow=nil;observedPID=nil
         for (_,entry) in scopedProcesses where entry.1=="study" {if entry.0.isRunning{entry.0.terminate()}}
         if observationSpeech{speechGeneration=UUID();audio?.stop();observationSpeech=false}
+    }
+    var voicePaused:Bool{(readJSON("voice-control.json")["pausedUntil"] as? Double ?? 0)>Date().timeIntervalSince1970}
+    func setVoicePause(_ pause:Bool){
+        writeJSON(["pausedUntil":pause ? Date().timeIntervalSince1970+900:0],"voice-control.json")
+        if pause{speechGeneration=UUID();audio?.stop();audioTask?.terminate();speechBusy=false}
+        petView.say(pause ? "语音暂停十五分钟，文字聊天继续。":"语音暂停已解除。",seconds:6)
+        status.menu=makeMenu()
+    }
+    func startNewTopic(){
+        cancelCurrentTurn();companion.chatRequest=UUID();companion.chatBusy=false;companion.waitTimer?.invalidate();companion.send.isEnabled=true
+        run("newTopic"){[weak self] r in
+            guard let self=self else{return}
+            if let d=r["data"] as? [String:Any],let text=d["answer"] as? String{self.companion.messages="露娜\n"+text+"\n\n";self.companion.showChat()}
+            else{self.petView.say("新话题没有建立，原来的记录仍然保留。",seconds:6)}
+        }
     }
     func cancelCurrentTurn(){
         turnGeneration=UUID();cancelObservation();speechGeneration=UUID();audio?.stop()
@@ -370,7 +391,7 @@ final class Guardian:NSObject,NSApplicationDelegate,CLLocationManagerDelegate,AV
     func refreshWeather(){guard !resourceLimited,!weatherBusy else{return};weatherBusy=true;run("weather"){[weak self] r in guard let self=self else{return};self.weatherBusy=false;if let d=r["data"] as? [String:Any]{self.handleWeather(d)}else{self.event("toast",["text":r["error"] ?? "天气未更新"])}}}
     func handleWeather(_ d:[String:Any]){lastWeather=d;event("weather",d);let rawState=d["state"] as? String ?? "idle";let night=(d["current"] as? [String:Any])?["is_day"] as? Int == 0;let state=rawState=="sunny" && night ? "night":rawState;if !jobBusy{animate(state,seconds:12)};if ["storm","snow","hot","cold"].contains(state){let key="weatherVoice-"+state;let last=UserDefaults.standard.double(forKey:key);if Date().timeIntervalSince1970-last>21600,!muted,!isLocked(){if playVoice(state){UserDefaults.standard.set(Date().timeIntervalSince1970,forKey:key)}}}}
     func isLocked()->Bool{let info=CGSessionCopyCurrentDictionary() as? [String:Any];return info?["CGSSessionScreenIsLocked"] as? Bool ?? false}
-    @discardableResult func playVoice(_ kind:String,animateCharacter:Bool=true)->Bool{guard !isLocked() else{return false};let url=resources.appendingPathComponent("voices/\(kind).wav");guard fm.fileExists(atPath:url.path),let a=try? AVAudioPlayer(contentsOf:url) else{event("toast",["text":"这段语音尚未准备好。"]);return false};audio?.stop();audio=a;a.delegate=self;a.volume=0.65;let captions=(try? Data(contentsOf:resources.appendingPathComponent("voices/captions.json"))).flatMap{try? JSONSerialization.jsonObject(with:$0) as? [String:[String:String]]};if let zh=captions?[kind]?["zh"]{if animateCharacter{animate(kind,text:zh,seconds:a.duration+2)}else{petView.say(zh,seconds:a.duration+1)}};let success=a.play();writeJSON(["kind":kind,"started":success,"at":Date().timeIntervalSince1970,"duration":a.duration],"voice-playback.json");return success}
+    @discardableResult func playVoice(_ kind:String,animateCharacter:Bool=true)->Bool{guard !muted,!voicePaused,!isLocked() else{return false};let url=resources.appendingPathComponent("voices/\(kind).wav");guard fm.fileExists(atPath:url.path),let a=try? AVAudioPlayer(contentsOf:url) else{event("toast",["text":"这段语音尚未准备好。"]);return false};audio?.stop();audio=a;a.delegate=self;a.volume=0.65;let captions=(try? Data(contentsOf:resources.appendingPathComponent("voices/captions.json"))).flatMap{try? JSONSerialization.jsonObject(with:$0) as? [String:[String:String]]};if let zh=captions?[kind]?["zh"]{if animateCharacter{animate(kind,text:zh,seconds:a.duration+2)}else{petView.say(zh,seconds:a.duration+1)}};let success=a.play();writeJSON(["kind":kind,"started":success,"at":Date().timeIntervalSince1970,"duration":a.duration],"voice-playback.json");return success}
     func audioPlayerDidFinishPlaying(_ player:AVAudioPlayer,successfully flag:Bool){var d=readJSON("voice-playback.json");d["finished"]=flag;d["finishedAt"]=Date().timeIntervalSince1970;writeJSON(d,"voice-playback.json")}
     var lastHandoffPoll=Date.distantPast,lastHandoffToken=""
     func pollHandoff(){

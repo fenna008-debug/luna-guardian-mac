@@ -91,8 +91,8 @@
   },
   {
     "path": "build.py",
-    "sha256": "ac9e7cfa640482d9d4f9d169778e687e797e671eeef7e31ec86e04bf0c569530",
-    "bytes": 2416
+    "sha256": "5efbe785716d4bea7377ccbe4f6b13ef7ee0e958e19aa7ddf7937820916ecab2",
+    "bytes": 2497
   },
   {
     "path": "docs/CONFIGURATION.md",
@@ -125,6 +125,11 @@
     "bytes": 1224
   },
   {
+    "path": "docs/UPDATE-DAILY-ASSISTANT.md",
+    "sha256": "2b7e35f9732826d787f563c857cfd982724b4d54c4186b2b7be3f1d0c2a20db7",
+    "bytes": 3001
+  },
+  {
     "path": "docs/VERIFICATION.md",
     "sha256": "8e7c34cc0ebcf3125f2d7ad09c10714a33f3ef402c37776c66aec610d79b3524",
     "bytes": 4246
@@ -135,9 +140,14 @@
     "bytes": 72
   },
   {
+    "path": "integrations/astrbot_luna/FileOCR.swift",
+    "sha256": "575d4075e279fa0ce5bd2926fe72d92b08c5b4850a374078aa0070611ab030b8",
+    "bytes": 795
+  },
+  {
     "path": "integrations/astrbot_luna/README.md",
-    "sha256": "88fcc21a44691811d6ceca0ab1e27c5875d3eb9aeab7990a61448c93a5997d4c",
-    "bytes": 4403
+    "sha256": "bfa835867477e64f8edf39ea405f2c29e8af834630a6017ca81d46c0ec89d73c",
+    "bytes": 4942
   },
   {
     "path": "integrations/astrbot_luna/computer_status.py",
@@ -145,19 +155,24 @@
     "bytes": 3129
   },
   {
+    "path": "integrations/astrbot_luna/extra_files.py",
+    "sha256": "ece5688bafd2269c341ab4027ab3e6f964611e3e98b21b331b6fb2f9e5e461e8",
+    "bytes": 3581
+  },
+  {
     "path": "integrations/astrbot_luna/main.py",
-    "sha256": "29f3388351b3648f7da042631f99bfea4c6a24dc003666161eda7e9f06fb69df",
-    "bytes": 12475
+    "sha256": "9600d2592c6b9adfbb0b6ee6aa3245a5a997f166428c3b7c3f3edd33e217aae5",
+    "bytes": 13043
   },
   {
     "path": "integrations/astrbot_luna/media.py",
-    "sha256": "f6845e6c6f4ce1ee78fe4e9ddee2aa5c0c1ef16a41147871452d370df99c0ce8",
-    "bytes": 2472
+    "sha256": "1120b4ee72c7b4cf4eb1c089e51997204c7760247ea103dd37d35ac0cf86008d",
+    "bytes": 2673
   },
   {
     "path": "integrations/astrbot_luna/media_worker.py",
-    "sha256": "541ec87f28c450ab09af3079269a7f71f3fe47f1acf8f5d048d58ab308dd1c08",
-    "bytes": 6162
+    "sha256": "a2d7770f10a06eae32e2413b68cf12068e94765c9a74e23db51a9d523d7573fa",
+    "bytes": 6430
   },
   {
     "path": "integrations/astrbot_luna/metadata.yaml",
@@ -166,8 +181,8 @@
   },
   {
     "path": "integrations/astrbot_luna/qq_router.py",
-    "sha256": "44cd7ce6cbc6e3694f8013ae5e3a6be8e3098a460459e23ce15d15fbbf24d2f2",
-    "bytes": 3421
+    "sha256": "b0ad5e026d98a06a1896a952115dead76fafd32b37aa8ce925754e908fccd55a",
+    "bytes": 3630
   },
   {
     "path": "integrations/astrbot_luna/qq_voice.py",
@@ -176,18 +191,18 @@
   },
   {
     "path": "integrations/astrbot_luna/remote_actions.py",
-    "sha256": "a4e0040a3327abf86907213363edd34daa8054467283b28771e39bbb63716d9b",
-    "bytes": 8690
+    "sha256": "73e79791ee612cb7a62967b8ac1439b7ca2e30415ea1ff8b47d494cb1eda249a",
+    "bytes": 9033
   },
   {
     "path": "integrations/astrbot_luna/requirements.txt",
-    "sha256": "9695a23827664113901e48eacce4329709580fa3cdfc6ab5f109d9b3107c9f2d",
-    "bytes": 87
+    "sha256": "737b670dd4a0e5058a7a9b4ce813509349ae466e78f92a96058c47110b67299b",
+    "bytes": 134
   },
   {
     "path": "integrations/astrbot_luna/test_bridge.py",
-    "sha256": "0863ffb73edc0be4c03aa56e435a28910803f16925788c0fc7d6b7bec7b0bd38",
-    "bytes": 6826
+    "sha256": "596bc44f4f87119e51ce68fbf178beb41acc9ec91b7237b7af2ad3e81334761b",
+    "bytes": 6855
   },
   {
     "path": "integrations/astrbot_luna/test_computer_status.py",
@@ -195,39 +210,44 @@
     "bytes": 2555
   },
   {
+    "path": "integrations/astrbot_luna/test_extra_files.py",
+    "sha256": "352c475fc946dcf48a082ca73d9f124d6496a8458c88a6c2fda8d5b8645a1ebe",
+    "bytes": 829
+  },
+  {
     "path": "integrations/astrbot_luna/test_media.py",
-    "sha256": "6d10df2ba2d37021c57c2df705ad15e208326b20e87b1dc84eb4b1bed1281a30",
-    "bytes": 3850
+    "sha256": "56112c3c5fd0a890049edc7a1a934615ae83999545ef96f1ce557ca8d6e276a8",
+    "bytes": 3877
   },
   {
     "path": "integrations/astrbot_luna/test_qq_router.py",
-    "sha256": "637827bbe55ab2a6f9c98c03f2b334f09b3df236201e226f19b50401eaa2d23a",
-    "bytes": 1642
+    "sha256": "952da8808280535ed0cd3e2082d7b4741879b09f013fcc373af6253e011264be",
+    "bytes": 1660
   },
   {
     "path": "integrations/astrbot_luna/test_remote_actions.py",
-    "sha256": "9af9ed97fbbf92e51bfffb1348213187c03e54efb85e0497aac703090739eafb",
-    "bytes": 4732
+    "sha256": "959727665a77ec9bf9107710cdf91d7ca7f0f5dda2a2d2b96c27aa6474b0a47d",
+    "bytes": 4752
   },
   {
     "path": "integrations/astrbot_luna/worker.py",
-    "sha256": "5936d84e1ac1313d72c42137f547c3de9d321af73facbadf005af0a202d46006",
-    "bytes": 5742
+    "sha256": "436316f161e47debb3b046ba2d0cd525ca96bb1ebfdafb62c4e77540bbb169bc",
+    "bytes": 6484
   },
   {
     "path": "src/Bubble.swift",
-    "sha256": "4c3479e03df22b1c474674a262698bfa761fa3d1c5b90ea5d05035aa59067096",
-    "bytes": 16760
+    "sha256": "91aec41b7c4cae1e107d2fee46eacec8000d738e6798215f62fe2c6d172375da",
+    "bytes": 16618
   },
   {
     "path": "src/Center.swift",
-    "sha256": "4502a3dac0aaf7e901ce8924378e77793fdfd50c80e4c8872ca2a73de1f1cfc8",
-    "bytes": 18374
+    "sha256": "f73152d0713c8b9f9a7a08c7ebe68c59880a764d61a4796a9ca0d8a26e7c2c81",
+    "bytes": 20231
   },
   {
     "path": "src/Daily.swift",
-    "sha256": "b6e67ea912b2c0dee29ff61b403dd6f377a68ed3734ce713fd1fc844666b01e4",
-    "bytes": 4758
+    "sha256": "bd99b73edd686794374d41bd78fbcfddcf45d82c6ebe23a26107ceb4a6a3be86",
+    "bytes": 5717
   },
   {
     "path": "src/ExportAnimation.swift",
@@ -261,13 +281,23 @@
   },
   {
     "path": "src/Scene.swift",
-    "sha256": "e08009ee477da996727f48f4416696d287850a4068597db24ffc8a6be8e697ae",
-    "bytes": 5216
+    "sha256": "f8a1784f26734745ddd74fd685020198f2a975267210ae69c03dd8b2d1095c90",
+    "bytes": 5265
   },
   {
     "path": "src/backend.py",
-    "sha256": "a5786ddc2f891c7a006fc0e2725a88612b6d9b66ab34a196a800139b795fe942",
-    "bytes": 33563
+    "sha256": "52dc76c903f623d671bb6a66634bdbb46f4adca57d9e890954eaefd93b970c5b",
+    "bytes": 34369
+  },
+  {
+    "path": "src/course_schedule.py",
+    "sha256": "f20b3f68c5966dd674c73ab33ec1f2c847f758a4585619911aa6bc5cfe83f6e3",
+    "bytes": 2746
+  },
+  {
+    "path": "src/daily_actions.py",
+    "sha256": "979d3a66717dcee0bb178ccf40f9544ba26a327d64449a9d05e63fb191d276bc",
+    "bytes": 2601
   },
   {
     "path": "src/delegation.py",
@@ -290,9 +320,14 @@
     "bytes": 22382
   },
   {
+    "path": "src/local_actions.py",
+    "sha256": "1786ff568d311f6ab7127f5961be9aeac7f8f61b62cf98681976912e2eeda505",
+    "bytes": 3749
+  },
+  {
     "path": "src/main.swift",
-    "sha256": "0d966a0c24da035d02c5bb306c81fd969a003e2970d3d5731d8f41ed399d63b8",
-    "bytes": 55066
+    "sha256": "49465caee724397fa2d0198c777619444a7e738c2317527af7c68a3bc91e38c9",
+    "bytes": 56284
   },
   {
     "path": "src/maintenance.py",
@@ -320,6 +355,11 @@
     "bytes": 7927
   },
   {
+    "path": "src/session_controls.py",
+    "sha256": "4b8000546a4d9d8fa12f9acfbe769b95534c6d0d24299a797ff0e964d60bb250",
+    "bytes": 1908
+  },
+  {
     "path": "src/speech.py",
     "sha256": "193d0aad83a5f32b61ab25c57b7607a971ed034be4275a0bffdaae0b4cac8b50",
     "bytes": 1808
@@ -333,6 +373,11 @@
     "path": "src/test_backend.py",
     "sha256": "32b884e092f08074339b898f1f7d5574a14c9645861b37a91d7ebe6bef105d89",
     "bytes": 11004
+  },
+  {
+    "path": "src/test_course_schedule.py",
+    "sha256": "8479aa85805f1d1a476860e0730d03a75e1d93143154a928fa16861aeeb5b904",
+    "bytes": 1163
   },
   {
     "path": "src/test_daily_memory.py",
@@ -355,6 +400,11 @@
     "bytes": 5500
   },
   {
+    "path": "src/test_local_actions.py",
+    "sha256": "b0ad88ddcb93622e569f4a9bab01a06d0b69b1dd3ad6a0f39b0eb9f93fa26a10",
+    "bytes": 1259
+  },
+  {
     "path": "src/test_notebook.py",
     "sha256": "6423fa72b7fcd858e354b5c3d978b8d0d9941212c8628bcfbacd9ef4e436ba5a",
     "bytes": 4136
@@ -363,6 +413,11 @@
     "path": "src/test_reading.py",
     "sha256": "70aa6bcb74ce290a2633101d64e3499b061f85620b439837701a4d114ac76335",
     "bytes": 2850
+  },
+  {
+    "path": "src/test_session_controls.py",
+    "sha256": "68dcb7890217cc7906c90123c2740d06ba48988075949b449ce702fed676cfc8",
+    "bytes": 1189
   },
   {
     "path": "src/web_tools.py",

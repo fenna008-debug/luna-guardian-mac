@@ -13,7 +13,7 @@ import time
 from pathlib import Path
 
 from astrbot.api.event import AstrMessageEvent, filter
-from astrbot.api.message_components import File, Record
+from astrbot.api.message_components import File, Record, Image
 from astrbot.api.star import Context, Star, StarTools
 from astrbot.core.utils.astrbot_path import get_astrbot_temp_path
 
@@ -36,6 +36,13 @@ def plain_chat(text):
     text=re.sub(r'(\*\*|__|~~)(.*?)\1',r'\2',text,flags=re.S)
     text=re.sub(r'`([^`]+)`',r'\1',text)
     return text.strip()
+
+def voice_paused():
+    try:
+        state=json.loads((Path.home()/'Library/Application Support/LunaGuardian/voice-control.json').read_text())
+        return state.get('pausedUntil',0)>time.time()
+    except (OSError,ValueError):return False
+
 
 def occasional_voice(message,answer,count,last_voice,now):
     return (count % 5 == 0 and now-last_voice >= 600 and 4 <= len(answer) <= 450
@@ -88,7 +95,7 @@ class LunaBridge(Star):
             if state["owner"] != sender or state.get("platform") != platform:
                 return
             components = event.get_messages()
-            attachments = [c for c in components if isinstance(c, (File, Record))]
+            attachments = [c for c in components if isinstance(c, (File, Record)) or isinstance(c,Image)]
             if len(message) > 6000 or len(attachments) > 1:
                 await event.send(
                     event.plain_result("每次请发一份附件或不超过 6000 字的文字。")
@@ -102,10 +109,11 @@ class LunaBridge(Star):
             job = Path(tempfile.mkdtemp(prefix="luna-", dir=self.state_path.parent))
             job.chmod(0o700)
             try:
+                is_image = bool(attachments and isinstance(attachments[0],Image))
                 is_record = bool(attachments and isinstance(attachments[0], Record))
                 is_audio = is_record or bool(
                     attachments
-                    and Path(attachments[0].name or "").suffix.lower()
+                    and Path(getattr(attachments[0],"name","") or "").suffix.lower()
                     in {".wav", ".mp3", ".m4a", ".ogg", ".amr", ".silk"}
                 )
                 if attachments:
@@ -119,10 +127,10 @@ class LunaBridge(Star):
                     item = attachments[0]
                     source = (
                         (item.url or item.file or "")
-                        if is_record
+                        if is_record or is_image
                         else (item.url or item.file_ or "")
                     )
-                    name = "voice.wav" if is_record else (item.name or "attachment")
+                    name = "voice.wav" if is_record else "image.png" if is_image else (item.name or "attachment")
                     path = await receive(
                         source, name, job, Path(get_astrbot_temp_path())
                     )
@@ -179,7 +187,7 @@ class LunaBridge(Star):
                 )
                 self.reply_count = getattr(self, 'reply_count', 0) + 1
                 auto_voice = not result.get('watch_job') and occasional_voice(message, answer, self.reply_count, self.last_voice, time.monotonic())
-                if (wants_voice or auto_voice) and event.get_platform_name() == "qq_official":
+                if (wants_voice or auto_voice) and not voice_paused() and event.get_platform_name() == "qq_official":
                     if time.monotonic() - self.last_voice < 60:
                         await event.send(
                             event.plain_result("刚刚处理过语音，这次先用文字回复你。")
@@ -199,7 +207,7 @@ class LunaBridge(Star):
                         },
                         125,
                     )
-                    if voice.get("voice"):
+                    if voice.get("voice") and not voice_paused():
                         await event.send(
                             event.plain_result("语音字幕：" + plain_chat(voice["caption"]))
                         )
@@ -212,7 +220,9 @@ class LunaBridge(Star):
                                 voice.get("error", "这次语音没有生成，文字回复已保留。")
                             )
                         )
-            except (ValueError, OSError, asyncio.TimeoutError):
+            except ValueError as error:
+                await event.send(event.plain_result(plain_chat(str(error))[:600]))
+            except (OSError, asyncio.TimeoutError):
                 await event.send(
                     event.plain_result(
                         "这次处理暂未完成。可以稍后再问我；如果刚才交代了任务，请先查询进度。"

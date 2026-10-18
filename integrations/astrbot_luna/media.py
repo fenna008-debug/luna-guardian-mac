@@ -9,7 +9,7 @@ import aiohttp
 
 MAX_BYTES = 20 * 1024 * 1024
 EXTENSIONS = {
-    ".pdf",
+    ".pdf", ".xls", ".xlsx", ".xlsm", ".pptx", ".doc", ".rtf", ".odt", ".html", ".htm", ".tsv", ".log", ".yaml", ".yml", ".xml", ".srt", ".vtt", ".png", ".jpg", ".jpeg", ".webp", ".heic", ".tif", ".tiff", ".bmp",
     ".docx",
     ".txt",
     ".md",
