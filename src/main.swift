@@ -175,6 +175,7 @@ final class Guardian:NSObject,NSApplicationDelegate,CLLocationManagerDelegate,AV
             self.criticalMode=pressure.data.contains(.critical);if pressure.data.contains(.critical){self.enterLightMode()}else if pressure.data.contains(.warning),!self.idleAppCare.attempt(){self.enterLightMode()};self.refreshMetrics()
         }
         pressureSource?.resume()
+        NSApp.servicesProvider=self;NSUpdateDynamicServices()
         companion.owner=self;popover.contentViewController=companion
         popover.contentSize=NSSize(width:340,height:380)
         let screen=NSScreen.main?.visibleFrame ?? NSRect(x:0,y:0,width:1200,height:800)
@@ -252,6 +253,7 @@ final class Guardian:NSObject,NSApplicationDelegate,CLLocationManagerDelegate,AV
         add("开始新话题","newTopic",to:m)
         add(voicePaused ? "恢复语音":"暂停语音 15 分钟","pauseVoice",to:m)
         add("后台管理","background",to:m)
+        add("交给 Codex 精读论文…","choosePaper",to:m)
         for (title,items) in [
             ("日常陪伴",[("看看天气","weather"),("抽一支签","fortune"),("一起吃点东西","eat"),("专注 25 分钟","focusStart"),("结束专注","focusStop"),("自主生活","world")]),
             ("读书与任务",[("读书手记与留言","readingNotebook"),("长期记忆","memoryNotebook"),("任务清单","taskNotebook"),("文字与学习工具","tools")]),
@@ -265,6 +267,7 @@ final class Guardian:NSObject,NSApplicationDelegate,CLLocationManagerDelegate,AV
     @objc func menuAction(_ sender:NSMenuItem){
         guard let action=sender.representedObject as? String else{return}
         switch action {
+        case "choosePaper":choosePaper()
         case "newTopic":startNewTopic()
         case "pauseVoice":setVoicePause(!voicePaused)
         case "background":openCenter(4)
@@ -328,7 +331,7 @@ final class Guardian:NSObject,NSApplicationDelegate,CLLocationManagerDelegate,AV
     }
     func cancelCurrentTurn(){
         turnGeneration=UUID();cancelObservation();speechGeneration=UUID();audio?.stop()
-        for (_,entry) in scopedProcesses where ["chat","voiceLine","speak"].contains(entry.1){if entry.0.isRunning{entry.0.terminate()}}
+        for (_,entry) in scopedProcesses where ["chat","assist","voiceLine","speak"].contains(entry.1){if entry.0.isRunning{entry.0.terminate()}}
     }
     func taskCard(_ id:String,_ title:String,_ state:String,_ seconds:Double=0){
         var rows=readJSON("task-cards.json")["items"] as? [[String:Any]] ?? []
@@ -343,7 +346,7 @@ final class Guardian:NSObject,NSApplicationDelegate,CLLocationManagerDelegate,AV
         guard queue.operationCount<4 else{completion(["ok":false,"error":"我正忙着处理前面的事，请稍等一下。"]);return}
         if action=="notebook",let op=payload["op"] as? String,op != "list"{cancelCurrentTurn()}
         let token=turnGeneration,observation=observationGeneration,ident=UUID(),started=Date()
-        let scoped=["chat","study","voiceLine","speak","codexSubmit"].contains(action)
+        let scoped=["chat","assist","study","voiceLine","speak","codexSubmit"].contains(action)
         let titles=["chat":"回应你的消息","assist":"学习工具处理","scan":"扫描旧缓存","clean":"移入恢复区","restore":"恢复文件","security":"检查系统保护","notebook":"读取或保存手记","weather":"查询天气"]
         let title=titles[action]
         if let title=title{taskCard(ident.uuidString,title,"进行中")}
@@ -411,7 +414,7 @@ final class Guardian:NSObject,NSApplicationDelegate,CLLocationManagerDelegate,AV
     }
     func routeCodex(_ prompt:String){if !popover.isShown{showDashboard()};companion.showChat();if prompt.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty{companion.input.placeholderString="直接告诉我想做什么…"}else{companion.input.stringValue="交给Codex："+prompt;companion.submit()}}
 
-    func tickFocus(){pollHandoff();guard let end=focusEnd else{return};let n=max(0,Int(end.timeIntervalSinceNow));event("focus",["time":String(format:"%02d:%02d",n/60,n%60),"text":n>0 ? "露娜正在陪你专心。":"这一轮完成了，休息一下吧。"]);if n==0{focusEnd=nil;animate("happy",text:"这一轮完成了。做得不错，起来活动一下吧。",seconds:10)}}
+    func tickFocus(){pollAppActions();pollHandoff();guard let end=focusEnd else{return};let n=max(0,Int(end.timeIntervalSinceNow));event("focus",["time":String(format:"%02d:%02d",n/60,n%60),"text":n>0 ? "露娜正在陪你专心。":"这一轮完成了，休息一下吧。"]);if n==0{focusEnd=nil;animate("happy",text:"这一轮完成了。做得不错，起来活动一下吧。",seconds:10)}}
     func settings(){event("settings",["muted":muted,"watch":watching,"login":fm.fileExists(atPath:loginPath.path)])}
     var loginPath:URL{fm.homeDirectoryForCurrentUser.appendingPathComponent("Library/LaunchAgents/local.luna.lunaguardian.plist")}
     func toggleLogin(){do{if fm.fileExists(atPath:loginPath.path){try fm.removeItem(at:loginPath)}else{try fm.createDirectory(at:loginPath.deletingLastPathComponent(),withIntermediateDirectories:true);let plist:[String:Any]=["Label":"local.luna.lunaguardian","ProgramArguments":[Bundle.main.executableURL!.path,"--background"],"RunAtLoad":true,"ProcessType":"Interactive"];let d=try PropertyListSerialization.data(fromPropertyList:plist,format:.xml,options:0);try d.write(to:loginPath,options:.atomic)};settings()}catch{event("toast",["text":error.localizedDescription])}}

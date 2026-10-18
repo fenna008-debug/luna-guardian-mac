@@ -52,9 +52,9 @@ def handle(message,base,runner):
         hits,partial=find_files(query)
         if not hits:return '在桌面、文稿和下载的已索引文件中，没有找到文件名包含“'+query+'”的文件。未被系统索引的文件可能查不到，可以换一个关键词。'
         return '找到这些文件或文件夹（只查名称，尚未打开）：\n'+'\n'.join(hits)+('\n结果或查找范围已截断，可以加关键词缩小范围。' if partial else '')
-    if re.fullmatch(r'(?:请|帮我)?(?:播放音乐|放首歌|放点音乐|听歌|播放网易云音乐)',m):
-        result=runner(['/usr/bin/open','-a','NeteaseMusic'],capture_output=True,text=True,timeout=15)
-        return '已请求打开网易云音乐。目前还无法确认播放器已经开始播放，请先在播放器选歌。' if result.returncode==0 else '网易云音乐没有打开成功，尚未播放。'
-    if m in ('暂停音乐','下一首','上一首','继续播放音乐'):
-        return '网易云音乐的播放控制还未接通，这次没有执行。请暂时在播放器操作。'
+    commands={'播放音乐':'play','放首歌':'play','放点音乐':'play','听歌':'play','播放网易云音乐':'play','继续播放音乐':'play','继续播放':'play','暂停音乐':'pause','暂停播放':'pause','下一首':'next','上一首':'previous'}
+    command=re.sub(r'^(?:请|帮我|替我)','',m)
+    if command in commands:
+        from app_actions import music
+        return music(base,commands[command])
     return None

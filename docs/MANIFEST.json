@@ -91,8 +91,8 @@
   },
   {
     "path": "build.py",
-    "sha256": "5efbe785716d4bea7377ccbe4f6b13ef7ee0e958e19aa7ddf7937820916ecab2",
-    "bytes": 2497
+    "sha256": "0e73ce8994977f38b53011c62a9642e8e7fa17be0ba391290038a1690e51f3db",
+    "bytes": 2829
   },
   {
     "path": "docs/CONFIGURATION.md",
@@ -128,6 +128,11 @@
     "path": "docs/UPDATE-DAILY-ASSISTANT.md",
     "sha256": "0c4256c64665d8a6d4d0bc32520ea73f83bac825348b2e6e7c107b5de5a60b66",
     "bytes": 3092
+  },
+  {
+    "path": "docs/UPDATE-PAPER-AND-MUSIC.md",
+    "sha256": "c952823f59497f3aea77f5da5a8cf5368c7bf5f741841a5005f5e0e5c2fee12c",
+    "bytes": 2839
   },
   {
     "path": "docs/VERIFICATION.md",
@@ -235,6 +240,11 @@
     "bytes": 6484
   },
   {
+    "path": "src/AppActions.swift",
+    "sha256": "5c1076027e0396ad1b1c25174fe4b99876119169616a09a6c2e0355385863503",
+    "bytes": 6260
+  },
+  {
     "path": "src/Bubble.swift",
     "sha256": "91aec41b7c4cae1e107d2fee46eacec8000d738e6798215f62fe2c6d172375da",
     "bytes": 16618
@@ -285,9 +295,14 @@
     "bytes": 5265
   },
   {
+    "path": "src/app_actions.py",
+    "sha256": "4ac7ad78553fd29cf680f887af4fca73751126c4d1f6fbc7555d14ae96ba14c1",
+    "bytes": 875
+  },
+  {
     "path": "src/backend.py",
-    "sha256": "52dc76c903f623d671bb6a66634bdbb46f4adca57d9e890954eaefd93b970c5b",
-    "bytes": 34369
+    "sha256": "011036956f3f8c7af08446a66ecb12bfa417093d1a3a5e07042ac9c1859aee77",
+    "bytes": 34902
   },
   {
     "path": "src/course_schedule.py",
@@ -296,8 +311,8 @@
   },
   {
     "path": "src/daily_actions.py",
-    "sha256": "bf733f43100c2a1f216383a90d2fd7b03c0503e05886c0a3407085f080963f37",
-    "bytes": 3965
+    "sha256": "77ba9c935a531d859b03ceaf237958b36d2f3855f78de81559376bfee6660984",
+    "bytes": 3776
   },
   {
     "path": "src/delegation.py",
@@ -326,8 +341,8 @@
   },
   {
     "path": "src/main.swift",
-    "sha256": "49465caee724397fa2d0198c777619444a7e738c2317527af7c68a3bc91e38c9",
-    "bytes": 56284
+    "sha256": "dc0a0d0e400c2644e1b399227e6cbe9b31f69f6a7bee36454bf7c7e60b172723",
+    "bytes": 56485
   },
   {
     "path": "src/maintenance.py",
@@ -343,6 +358,11 @@
     "path": "src/notebook.py",
     "sha256": "c15434730f839c19d8b7364683788bcfc858a0ae32f7aaa3c897819a7f7c73e7",
     "bytes": 4893
+  },
+  {
+    "path": "src/paper_tools.py",
+    "sha256": "c1f1526541f1e857e14fcdd5df4953540626fd4c940bb886e4a72b5f077f0e9b",
+    "bytes": 2062
   },
   {
     "path": "src/persona_luna.txt",
@@ -408,6 +428,11 @@
     "path": "src/test_notebook.py",
     "sha256": "6423fa72b7fcd858e354b5c3d978b8d0d9941212c8628bcfbacd9ef4e436ba5a",
     "bytes": 4136
+  },
+  {
+    "path": "src/test_paper_tools.py",
+    "sha256": "68206a13dafa6383f4a8d60dd8ba7ffebdf9acdad1244e892ff11afc19bb02a1",
+    "bytes": 1821
   },
   {
     "path": "src/test_reading.py",
