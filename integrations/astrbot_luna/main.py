@@ -5,6 +5,7 @@ import hashlib
 import hmac
 import json
 import os
+import re
 import shutil
 import sys
 import tempfile
@@ -19,6 +20,29 @@ from astrbot.core.utils.astrbot_path import get_astrbot_temp_path
 from .media import receive
 
 
+def plain_chat(text):
+    text=str(text).strip()
+    raw=re.sub(r'^```(?:json)?\s*|\s*```$', '',text)
+    try:
+        obj=json.loads(raw)
+    except (ValueError,TypeError):obj=None
+    if isinstance(obj,(dict,list)):
+        if isinstance(obj,dict) and ('memory_update' in obj or obj.get('type')=='memory_update'):
+            return '这条信息还没有确认写入记忆。你可以对我说“记住：”加上要保存的内容。'
+        return '这次没有取得可读的回复，也不能据此确认操作完成。请再告诉我具体要做什么。'
+    text=re.sub(r'```[^\n]*\n[\s\S]*?```','详细代码已省略，可以让我发成文件。',text)
+    text=re.sub(r'\[([^\]]+)\]\((https?://[^)]+)\)',r'\1：\2',text)
+    text=re.sub(r'(?m)^\s*(?:#{1,6}\s+|[-*+]\s+|>\s*)','',text)
+    text=re.sub(r'(\*\*|__|~~)(.*?)\1',r'\2',text,flags=re.S)
+    text=re.sub(r'`([^`]+)`',r'\1',text)
+    return text.strip()
+
+def occasional_voice(message,answer,count,last_voice,now):
+    return (count % 5 == 0 and now-last_voice >= 600 and 4 <= len(answer) <= 450
+            and not re.search(r'不要.*语音|别.*语音|只.*文字|静音|进度|电脑状况|功能菜单',message)
+            and not re.search(r'https?://|没有.*(?:执行|完成)|失败|超时',answer))
+
+
 class LunaBridge(Star):
     def __init__(self, context: Context):
         super().__init__(context)
@@ -26,6 +50,7 @@ class LunaBridge(Star):
         self.lock = asyncio.Lock()
         self.last_voice = 0.0
         self.work_watchers = set()
+        self.reply_count = 0
 
     @filter.event_message_type(filter.EventMessageType.ALL, priority=10000)
     async def incoming(self, event: AstrMessageEvent):
@@ -118,7 +143,7 @@ class LunaBridge(Star):
                         message = result["transcript"]
                         await event.send(event.plain_result("我听到的是：" + message))
                     else:
-                        await event.send(event.plain_result(result["answer"][:3500]))
+                        await event.send(event.plain_result(plain_chat(result["answer"])[:3500]))
                         await event.send(
                             event.chain_result(
                                 [
@@ -136,7 +161,7 @@ class LunaBridge(Star):
                     if voice_test
                     else await self.run_worker("worker.py", {"message": message, "request_id": (platform + ":" + str(getattr(getattr(event, "message_obj", None), "message_id", ""))) if getattr(getattr(event, "message_obj", None), "message_id", "") else ""}, 65)
                 )
-                answer = str(result.get("answer", "暂时没有收到回复，请稍后再试。"))
+                answer = plain_chat(result.get("answer", "暂时没有收到回复，请稍后再试。"))
                 await event.send(event.plain_result(answer[:3500]))
                 if result.get('watch_job'):
                     task=asyncio.create_task(self.watch_work(event,result['watch_job']))
@@ -152,7 +177,9 @@ class LunaBridge(Star):
                 wants_voice = is_audio or any(
                     word in message for word in ("语音", "念给我", "说给我听")
                 )
-                if wants_voice and event.get_platform_name() == "qq_official":
+                self.reply_count = getattr(self, 'reply_count', 0) + 1
+                auto_voice = not result.get('watch_job') and occasional_voice(message, answer, self.reply_count, self.last_voice, time.monotonic())
+                if (wants_voice or auto_voice) and event.get_platform_name() == "qq_official":
                     if time.monotonic() - self.last_voice < 60:
                         await event.send(
                             event.plain_result("刚刚处理过语音，这次先用文字回复你。")
@@ -174,7 +201,7 @@ class LunaBridge(Star):
                     )
                     if voice.get("voice"):
                         await event.send(
-                            event.plain_result("语音字幕：" + voice["caption"])
+                            event.plain_result("语音字幕：" + plain_chat(voice["caption"]))
                         )
                         await event.send(
                             event.chain_result([Record.fromFileSystem(voice["voice"])])
@@ -204,7 +231,7 @@ class LunaBridge(Star):
                 if result.get('state') in ('completed','failed','cancelled'):
                     text=('你交代的事有结果了：\n' if result['state']=='completed' else '这件事暂时没办成：\n')+str(result.get('answer','没有取得结果'))
                     if len(text)>3400:text=text[:3300]+'\n完整结果可以对我说“Codex结果，发成文件”。'
-                    await event.send(event.plain_result(text))
+                    await event.send(event.plain_result(plain_chat(text)))
                     return
                 if result.get('error'):return
         except Exception:

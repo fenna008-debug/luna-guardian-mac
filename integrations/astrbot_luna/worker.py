@@ -66,7 +66,10 @@ def _respond(message, request_id=""):
     backend.save = lambda name, data: original_save(
         "remote-" + name if name in names else name, data
     )
-    return backend.public_answer(backend.chat(message, timeout=45)["answer"], message)
+    answer=backend.public_answer(backend.chat(message, timeout=45)["answer"], message)
+    if re.search(r"(?:已|已经).{0,8}(?:交接|转交|提交|派发)|(?:交接|转交|提交|派发).{0,8}(?:完成|成功)",answer) and re.search('codex',answer,re.I):
+        return "这件事还没有实际交给 Codex，也没有设置成功。你可以直接说‘交给 Codex：’加上具体任务，我会确认提交结果。"
+    return answer
 
 
 def respond(message, request_id=""):

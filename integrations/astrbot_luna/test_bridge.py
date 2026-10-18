@@ -162,3 +162,16 @@ class WorkReceiptTests(BridgeTests):
         self.bridge.run_worker=AsyncMock()
         await self.bridge.incoming(Event('这个交给Codex干',sender='other',kind='qq_official'))
         self.bridge.run_worker.assert_not_called()
+
+class ReplyStyleTests(BridgeTests):
+    async def test_plain_chat_and_unconfirmed_memory(self):
+        self.assertEqual(self.module.plain_chat('## 今天\n**中吉**，看 `手记`。'), '今天\n中吉，看 手记。')
+        self.assertNotIn('{',self.module.plain_chat('{"memory_update":"地区"}'))
+        self.assertNotIn('已记住',self.module.plain_chat('{"memory_update":"地区"}'))
+
+    async def test_occasional_voice_is_bounded(self):
+        f=self.module.occasional_voice
+        self.assertTrue(f('今天真开心','嗯，我也替你高兴。',5,0,1000))
+        self.assertFalse(f('今天真开心','嗯，我也替你高兴。',4,0,1000))
+        self.assertFalse(f('只用文字','嗯，我也替你高兴。',5,0,1000))
+        self.assertFalse(f('今天真开心','嗯，我也替你高兴。',5,900,1000))

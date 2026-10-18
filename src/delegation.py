@@ -3,7 +3,7 @@ import json,re
 
 def explicit(message):
     if re.search(r'不要|不用|不需要|别|假如|假设|比如|例如|别人说|怎么.*(?:交给|调用)|如何.*(?:交给|调用)',message):return False
-    return bool(re.search(r'(?:交给|转交给?|交由|派给|让|调用|使用)\s*codex',message,re.I))
+    return bool(re.search(r'(?:交给|转交给?|交由|派给|发给|发送给|找|让|调用|使用)\s*codex',message,re.I))
 
 def prepare(message,history,chat=None,only_explicit=False):
     chosen=explicit(message)
@@ -22,7 +22,7 @@ def prepare(message,history,chat=None,only_explicit=False):
         reason=str(d.get('reason','需要实际执行的多步骤任务'))[:200]
     # References are resolved from this channel only, never another chat's history.
     recent=[r for r in history if isinstance(r,dict) and r.get('role') in ('user','assistant')][-6:]
-    remainder=re.sub(r'(?:这个|这件事|刚才那个|刚才的|上面那个|上述|它|请|帮我|交给|转交给?|交由|派给|让|调用|使用|codex|干|做|处理|吧|一下|来|你|去|[\s：:,，。！!])','',message,flags=re.I)
+    remainder=re.sub(r'(?:这个|这件事|刚才那个|刚才的|上面那个|上述|它|请|帮我|交给|转交给?|交由|派给|发给|发送给|找|让|调用|使用|codex|干|做|处理|吧|一下|来|你|去|[\s：:,，。！!])','',message,flags=re.I)
     reference=chosen and (not remainder or bool(re.search(r'这个|这件事|刚才|上述|上面|它',message)))
     if reference and not any(r.get('role')=='user' and not explicit(r.get('text','')) for r in recent):
         return {'question':'你指的是哪件事？把要做的内容告诉我，我再替你交过去。'}

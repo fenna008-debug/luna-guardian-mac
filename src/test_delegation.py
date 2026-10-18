@@ -18,3 +18,11 @@ class DelegationTests(unittest.TestCase):
   self.assertIsNotNone(prepare('帮我修复这个程序',[],Mock(return_value={'answer':'{"is_action":true,"needs_tools":true,"complexity":"high"}'})))
  def test_smalltalk_never_calls_classifier(self):
   chat=Mock();self.assertIsNone(prepare('今天看什么书',[],chat));chat.assert_not_called()
+
+class NaturalSendTests(unittest.TestCase):
+    def test_qq_send_and_help(self):
+        from delegation import explicit,prepare
+        self.assertTrue(explicit('你根据课表来提醒我，把这个发给codex叫她修改你'))
+        self.assertTrue(explicit('这个任务有困难就找codex帮助'))
+        self.assertFalse(explicit('不要发给codex'))
+        self.assertIsNotNone(prepare('把课表提醒发给codex修改',[],only_explicit=True))
