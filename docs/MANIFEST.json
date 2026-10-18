@@ -165,14 +165,19 @@
     "bytes": 219
   },
   {
+    "path": "integrations/astrbot_luna/qq_router.py",
+    "sha256": "44cd7ce6cbc6e3694f8013ae5e3a6be8e3098a460459e23ce15d15fbbf24d2f2",
+    "bytes": 3421
+  },
+  {
     "path": "integrations/astrbot_luna/qq_voice.py",
     "sha256": "574043aa94d3a085f5da187f2ebb40cc990e43c86b19930df177b39ca9e431cc",
     "bytes": 2958
   },
   {
     "path": "integrations/astrbot_luna/remote_actions.py",
-    "sha256": "ee6c81acdf952cb8c7682bec4d8a94c2ad0248418ebec03526737c859949a492",
-    "bytes": 8691
+    "sha256": "a4e0040a3327abf86907213363edd34daa8054467283b28771e39bbb63716d9b",
+    "bytes": 8690
   },
   {
     "path": "integrations/astrbot_luna/requirements.txt",
@@ -195,9 +200,14 @@
     "bytes": 3850
   },
   {
+    "path": "integrations/astrbot_luna/test_qq_router.py",
+    "sha256": "637827bbe55ab2a6f9c98c03f2b334f09b3df236201e226f19b50401eaa2d23a",
+    "bytes": 1642
+  },
+  {
     "path": "integrations/astrbot_luna/test_remote_actions.py",
-    "sha256": "9e04c80748e9dc1e3af5d8173f381065aeed0cc3836a06cd9f4d7eb78511a0f1",
-    "bytes": 4719
+    "sha256": "9af9ed97fbbf92e51bfffb1348213187c03e54efb85e0497aac703090739eafb",
+    "bytes": 4732
   },
   {
     "path": "integrations/astrbot_luna/worker.py",

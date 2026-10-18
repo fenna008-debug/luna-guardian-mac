@@ -63,7 +63,7 @@ class RemoteActionsTests(unittest.TestCase):
    submit.assert_not_called()
 
  def test_natural_file_request_delegates_but_advice_does_not(self):
-  with patch.object(handoff,'submit',return_value={'handoff':{'id':'a'*32}}) as submit,patch.object(backend,'chat',return_value={'answer':'{"is_action":true,"needs_tools":true,"complexity":"high"}'}):
+  with patch.object(handoff,'submit',return_value={'handoff':{'id':'a'*32}}) as submit,patch.object(backend,'chat',return_value={'answer':'{"is_action":true,"needs_tools":true,"route":"task","confidence":0.96}'}):
    self.assertIn('交给 Codex',self.call('帮我写一个整理文件的脚本'))
    self.assertIsNone(self.call('比如帮我写一个整理文件的脚本'))
    self.assertIsNone(self.call('不要帮我修改代码'))

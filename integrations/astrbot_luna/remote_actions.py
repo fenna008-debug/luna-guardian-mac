@@ -34,7 +34,7 @@ def command(message, backend):
     base=backend.BASE
     m=message.strip().rstrip('。！!')
     if m in ('帮助','菜单','功能','功能菜单','你能做什么','QQ功能','qq功能'):return HELP
-    from delegation import prepare
+    from qq_router import prepare
     def delegate(plan):
         if plan.get('question'):return plan['question']
         try:r=handoff.submit(base,plan['task'],'已配对用户通过 QQ/微信私聊提交：'+plan['reason'])
