@@ -2,9 +2,9 @@ import AppKit
 import ApplicationServices
 import UniformTypeIdentifiers
 
-private func axValue(_ element:AXUIElement,_ name:String)->CFTypeRef?{var value:CFTypeRef?;guard AXUIElementCopyAttributeValue(element,name as CFString,&value) == .success else{return nil};return value}
-private func axChildren(_ element:AXUIElement)->[AXUIElement]{axValue(element,kAXChildrenAttribute) as? [AXUIElement] ?? []}
-private func axTitle(_ element:AXUIElement)->String{axValue(element,kAXTitleAttribute) as? String ?? ""}
+func axValue(_ element:AXUIElement,_ name:String)->CFTypeRef?{var value:CFTypeRef?;guard AXUIElementCopyAttributeValue(element,name as CFString,&value) == .success else{return nil};return value}
+func axChildren(_ element:AXUIElement)->[AXUIElement]{axValue(element,kAXChildrenAttribute) as? [AXUIElement] ?? []}
+func axTitle(_ element:AXUIElement)->String{axValue(element,kAXTitleAttribute) as? String ?? ""}
 extension Guardian {
     func musicControl(_ action:String)->String {
         guard ["play","pause","next","previous"].contains(action) else{return "不支持这项音乐操作。"}
@@ -29,6 +29,7 @@ extension Guardian {
     }
     func pollAppActions(){
         let folder=support.appendingPathComponent("app-requests")
+        guard !musicSearchBusy else{return}
         guard let files=try? fm.contentsOfDirectory(at:folder,includingPropertiesForKeys:nil) else{return}
         for file in files.filter({$0.pathExtension=="json" && !$0.lastPathComponent.hasSuffix(".result.json")}).prefix(1){
             guard let data=try? Data(contentsOf:file),data.count<4096,let request=try? JSONSerialization.jsonObject(with:data) as? [String:Any] else{try? fm.removeItem(at:file);continue}
@@ -36,9 +37,11 @@ extension Guardian {
             let action=request["action"] as? String ?? ""
             // Claim before execution: a cancelled/stale request must never run later.
             try? fm.removeItem(at:file)
-            let answer=expires>Date().timeIntervalSince1970 ? musicControl(action):"音乐请求已过期，没有执行。"
             let output=folder.appendingPathComponent(file.deletingPathExtension().lastPathComponent+".result.json")
-            if let d=try? JSONSerialization.data(withJSONObject:["answer":answer]){try? d.write(to:output,options:.atomic)}
+            let finish:(String)->Void={answer in if let d=try? JSONSerialization.data(withJSONObject:["answer":answer]){try? d.write(to:output,options:.atomic)}}
+            if expires<=Date().timeIntervalSince1970{finish("音乐请求已过期，没有执行。")}
+            else if action=="search_play"{searchMusic(request["query"] as? String ?? "",artist:request["artist"] as? String ?? "",expires:expires,finish:finish)}
+            else{finish(musicControl(action))}
         }
     }
     func selectedMaterial(_ pasteboard:NSPasteboard,deep:Bool,error:AutoreleasingUnsafeMutablePointer<NSString?>){
@@ -46,7 +49,7 @@ extension Guardian {
         guard text.count<=6000 else{error.pointee="选区超过六千字，请按段处理，或从露娜菜单选择整篇论文精读。";return}
         cancelCurrentTurn();let token=turnGeneration;companion.chatBusy=true
         if !popover.isShown{showDashboard()}
-        companion.text("已取得选中文字，正在"+(deep ? "交给 Codex 精读。":"翻译。"),title:"日语论文选区")
+        companion.text("已取得选中文字，正在"+(deep ? "交给 Codex 精读。":"翻译。"),title:"论文选区")
         run(deep ? "paperRead":"assist",deep ? ["text":text]:["kind":"translate_zh","text":text]){[weak self] r in
             guard let self=self,self.turnGeneration==token else{return}
             self.companion.chatBusy=false
@@ -57,7 +60,7 @@ extension Guardian {
     @objc func translateSelection(_ pasteboard:NSPasteboard,userData:String?,error:AutoreleasingUnsafeMutablePointer<NSString?>){selectedMaterial(pasteboard,deep:false,error:error)}
     @objc func readSelection(_ pasteboard:NSPasteboard,userData:String?,error:AutoreleasingUnsafeMutablePointer<NSString?>){selectedMaterial(pasteboard,deep:true,error:error)}
     func choosePaper(){
-        let panel=NSOpenPanel();panel.allowedContentTypes=[.pdf];panel.allowsMultipleSelection=false;panel.message="选择要交给 Codex 总结与精读的日语论文"
+        let panel=NSOpenPanel();panel.allowedContentTypes=[.pdf];panel.allowsMultipleSelection=false;panel.message="选择要交给 Codex 总结与精读的论文"
         guard panel.runModal() == .OK,let url=panel.url else{return}
         run("paperRead",["path":url.path]){[weak self] r in
             guard let self=self else{return};if !self.popover.isShown{self.showDashboard()}

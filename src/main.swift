@@ -314,6 +314,7 @@ final class Guardian:NSObject,NSApplicationDelegate,CLLocationManagerDelegate,AV
         for (_,entry) in scopedProcesses where entry.1=="study" {if entry.0.isRunning{entry.0.terminate()}}
         if observationSpeech{speechGeneration=UUID();audio?.stop();observationSpeech=false}
     }
+    var musicSearchBusy=false
     var voicePaused:Bool{(readJSON("voice-control.json")["pausedUntil"] as? Double ?? 0)>Date().timeIntervalSince1970}
     func setVoicePause(_ pause:Bool){
         writeJSON(["pausedUntil":pause ? Date().timeIntervalSince1970+900:0],"voice-control.json")

@@ -12,16 +12,22 @@ def extract(path):
         raise ValueError("文件超过 20 MB。")
     suffix = path.suffix.lower()
     if suffix == ".pdf":
-        from pypdf import PdfReader
-
-        reader = PdfReader(path)
-        if reader.is_encrypted:
-            raise ValueError("请先解密 PDF 后再发给我。")
-        text = "\n".join(
-            f"[第 {i + 1} 页]\n" + (page.extract_text() or "")[:12000]
-            for i, page in enumerate(reader.pages[:12])
-        )
-        scope = f"仅处理前 {min(12, len(reader.pages))} 页，共 {len(reader.pages)} 页"
+        import subprocess
+        helper=Path("/Applications/露娜电脑管家.app/Contents/Resources/LunaPaperText")
+        if helper.exists():
+            done=subprocess.run([str(helper),str(path)],capture_output=True,text=True,timeout=60)
+            if done.returncode:raise ValueError("PDF无法读取或已加密，请先检查文件。")
+            data=json.loads(done.stdout)
+            if not data.get('readable'):raise ValueError("PDF没有取得可读文字，请核对原页。")
+            text,scope=data['text'],data['scope']
+        else:
+            from pypdf import PdfReader
+            reader=PdfReader(path)
+            if reader.is_encrypted:raise ValueError("请先解密 PDF 后再发给我。")
+            text="\n".join(f"[第 {i+1} 页]\n"+(page.extract_text() or "")[:12000] for i,page in enumerate(reader.pages[:12]))
+            scope=f"仅处理前 {min(12,len(reader.pages))} 页，共 {len(reader.pages)} 页；文本层，未进行OCR"
+            bad=sum(ord(c)<32 and c not in '\n\r\t' for c in text)
+            if bad>max(2,len(text)//100):raise ValueError("PDF文字层疑似乱码；请用露娜桌面导入并核对原页。")
     elif suffix == ".docx":
         with zipfile.ZipFile(path) as archive:
             if sum(i.file_size for i in archive.infolist()) > 50 * 1024 * 1024:
@@ -93,7 +99,7 @@ def process(request):
                 "读取范围："
                 + scope
                 + "\n\n"
-                + backend.chat(prompt, remember=False, timeout=90)["answer"]
+                + (backend.assist_task({"kind":"translate_zh","text":text}) if __import__("re").search(r"翻译|译成|译为",question) else backend.chat(prompt, remember=False, timeout=90,precision=True,output_tokens=2048))["answer"]
             )
             report = job / "露娜文件阅读.txt"
             report.write_text(answer, encoding="utf-8")

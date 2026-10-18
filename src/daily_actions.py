@@ -57,4 +57,25 @@ def handle(message,base,runner):
     if command in commands:
         from app_actions import music
         return music(base,commands[command])
+    song=parse_song(message)
+    if song:
+        from app_actions import music
+        return music(base,'search_play',query=song['title'],artist=song['artist'])
     return None
+
+def parse_song(message):
+    """Only direct music imperatives; text is never interpreted as code."""
+    m=message.strip().rstrip('。！!？?')
+    m=re.sub(r'^(?:(?:露娜|请|帮我|给我|替我|麻烦你)[，,\s]*)+','',m)
+    match=re.fullmatch(r'(?:用|在)?网易云(?:音乐)?(?:里)?(?:播放|放|听)(.+)',m)
+    if not match:match=re.fullmatch(r'(?:播放|放一下|放一首|放首|放|我想听|想听)(.+)',m)
+    if not match:return None
+    title=match[1].strip().rstrip('吧').strip()
+    if title in ('音乐','歌','首歌','点音乐','一下音乐') or not title or len(title)>200:return None
+    if any(x in title for x in ('怎么','如何','功能','代码','脚本','文件','视频','论文')):return None
+    artist=''
+    quoted=re.fullmatch(r'(.+?)的[《“"](.+?)[》”"]',title)
+    if quoted:artist,title=quoted[1],quoted[2]
+    else:title=title.strip('《》“”"')
+    if not title or len(title)>120 or len(artist)>80:return None
+    return {'title':title.strip(),'artist':artist.strip()}

@@ -91,8 +91,8 @@
   },
   {
     "path": "build.py",
-    "sha256": "0e73ce8994977f38b53011c62a9642e8e7fa17be0ba391290038a1690e51f3db",
-    "bytes": 2829
+    "sha256": "79c463336ca3bd708709a94f57596777eefce8de9d96f6a964b6b4bd1661280d",
+    "bytes": 3070
   },
   {
     "path": "docs/CONFIGURATION.md",
@@ -128,6 +128,11 @@
     "path": "docs/UPDATE-DAILY-ASSISTANT.md",
     "sha256": "0c4256c64665d8a6d4d0bc32520ea73f83bac825348b2e6e7c107b5de5a60b66",
     "bytes": 3092
+  },
+  {
+    "path": "docs/UPDATE-MUSIC-PAPERS-WORKBENCH.md",
+    "sha256": "336f2e358e5549264dbf3eac316c0b78d2c103d870c2a121be09b268d9761ecb",
+    "bytes": 3490
   },
   {
     "path": "docs/UPDATE-PAPER-AND-MUSIC.md",
@@ -176,8 +181,8 @@
   },
   {
     "path": "integrations/astrbot_luna/media_worker.py",
-    "sha256": "a2d7770f10a06eae32e2413b68cf12068e94765c9a74e23db51a9d523d7573fa",
-    "bytes": 6430
+    "sha256": "6f082e3d0199de34c32fe731f5ea036cd3092d19f96578d822e6fdf4bfa73d20",
+    "bytes": 7336
   },
   {
     "path": "integrations/astrbot_luna/metadata.yaml",
@@ -241,8 +246,8 @@
   },
   {
     "path": "src/AppActions.swift",
-    "sha256": "5c1076027e0396ad1b1c25174fe4b99876119169616a09a6c2e0355385863503",
-    "bytes": 6260
+    "sha256": "a71414e5a30235f103be9c778e014de9ab10fea3b9db96dd3aef3a77c3a025c8",
+    "bytes": 6494
   },
   {
     "path": "src/Bubble.swift",
@@ -251,8 +256,8 @@
   },
   {
     "path": "src/Center.swift",
-    "sha256": "f73152d0713c8b9f9a7a08c7ebe68c59880a764d61a4796a9ca0d8a26e7c2c81",
-    "bytes": 20231
+    "sha256": "d869cfa639c37f262655d5b4e9d1f81145a27300773b9f2bf145dd67ab1a30e9",
+    "bytes": 23052
   },
   {
     "path": "src/Daily.swift",
@@ -285,9 +290,19 @@
     "bytes": 15745
   },
   {
+    "path": "src/MusicSearch.swift",
+    "sha256": "1d15f1219ab28120187eec130a936b58cf173a9ca32eef316db1bd88fa82c3d7",
+    "bytes": 8260
+  },
+  {
     "path": "src/Notebook.swift",
     "sha256": "b521bd7207e96e9632a7653aacfe32d66edec46a6e0f329fcffe8574f32dd391",
     "bytes": 10838
+  },
+  {
+    "path": "src/PaperText.swift",
+    "sha256": "8529897411431eca047671935dd4ebe092a3246b6ec307685c702997ca20621a",
+    "bytes": 1424
   },
   {
     "path": "src/Scene.swift",
@@ -296,13 +311,13 @@
   },
   {
     "path": "src/app_actions.py",
-    "sha256": "4ac7ad78553fd29cf680f887af4fca73751126c4d1f6fbc7555d14ae96ba14c1",
-    "bytes": 875
+    "sha256": "c9d5e5e3366c3fb0af86dd09daf77e35563457022f0238d8d9210e71b0f6f223",
+    "bytes": 1104
   },
   {
     "path": "src/backend.py",
-    "sha256": "011036956f3f8c7af08446a66ecb12bfa417093d1a3a5e07042ac9c1859aee77",
-    "bytes": 34902
+    "sha256": "5c7ba48aaf3bfd390ab11d72b1fc0158ab613d231181f77c03ab7f07e5f5b886",
+    "bytes": 37300
   },
   {
     "path": "src/course_schedule.py",
@@ -311,8 +326,8 @@
   },
   {
     "path": "src/daily_actions.py",
-    "sha256": "77ba9c935a531d859b03ceaf237958b36d2f3855f78de81559376bfee6660984",
-    "bytes": 3776
+    "sha256": "9c6eaa4cab1054e7f3d712e526ae47a892eb2ec9d028f721496bb61b6470277c",
+    "bytes": 4968
   },
   {
     "path": "src/delegation.py",
@@ -341,8 +356,8 @@
   },
   {
     "path": "src/main.swift",
-    "sha256": "dc0a0d0e400c2644e1b399227e6cbe9b31f69f6a7bee36454bf7c7e60b172723",
-    "bytes": 56485
+    "sha256": "a367837e05f6ae53f9bfa7e815ce2da8bbbbc4c819faecbb5311dfa382a997fa",
+    "bytes": 56515
   },
   {
     "path": "src/maintenance.py",
@@ -361,8 +376,8 @@
   },
   {
     "path": "src/paper_tools.py",
-    "sha256": "c1f1526541f1e857e14fcdd5df4953540626fd4c940bb886e4a72b5f077f0e9b",
-    "bytes": 2062
+    "sha256": "259d0f6f8b0063f8af536cc9afaa3d983e85477718c9462e312aa54a2b8da6b5",
+    "bytes": 3000
   },
   {
     "path": "src/persona_luna.txt",
@@ -431,8 +446,8 @@
   },
   {
     "path": "src/test_paper_tools.py",
-    "sha256": "68206a13dafa6383f4a8d60dd8ba7ffebdf9acdad1244e892ff11afc19bb02a1",
-    "bytes": 1821
+    "sha256": "1a680b56d131b1b4c9e06db13539ef1c0e61fd9d4c233a811a3a7a781d946ae0",
+    "bytes": 4156
   },
   {
     "path": "src/test_reading.py",
@@ -448,5 +463,10 @@
     "path": "src/web_tools.py",
     "sha256": "d9570cbce3047352fd506aff959ea5333a7c0a38f59c03bbfc4e7bb903858b2a",
     "bytes": 1079
+  },
+  {
+    "path": "tools/paper-extract/main.swift",
+    "sha256": "46ea7a7dd60b9c576df3406c8201799ee34a9c39032443b189b5baa48f5b3f83",
+    "bytes": 895
   }
 ]

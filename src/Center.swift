@@ -9,20 +9,22 @@ final class CareCenter:NSWindowController {
     let tabs=NSSegmentedControl(labels:["电脑一览","学习工具","露娜的小世界","照看记录","后台管理"],trackingMode:.selectOne,target:nil,action:nil)
     let page=NSView(),summary=NSTextField(labelWithString:"正在读取电脑状态…"),subtitle=NSTextField(labelWithString:""),details=NSTextView(),input=NSTextView(),output=NSTextView(),task=NSPopUpButton(),toolStatus=NSTextField(labelWithString:""),lifeTitle=NSTextField(labelWithString:"")
     let taskKinds=["translate_zh","translate_ja","polish_ja","summary","research","plan","explain"]
+    var backgroundTimer:Timer?
     var taskBusy=false,coffee:Process?,resultText="",cards:[NSTextField]=[]
     var connection="连接尚未检查",connectionBusy=false,lastConnection=Date.distantPast
     init(_ guardian:Guardian){self.guardian=guardian
         let w=NSPanel(contentRect:NSRect(x:0,y:0,width:700,height:640),styleMask:[.titled,.closable,.miniaturizable],backing:.buffered,defer:false)
         w.title="露娜 · 小世界与电脑照看";w.isReleasedWhenClosed=false;w.appearance=NSAppearance(named:.darkAqua);w.backgroundColor=NSColor(calibratedRed:0.095,green:0.10,blue:0.13,alpha:1)
         super.init(window:w);let root=w.contentView!;tabs.frame=NSRect(x:24,y:588,width:652,height:30);tabs.target=self;tabs.action=#selector(changeTab);tabs.selectedSegment=0;root.addSubview(tabs)
-        page.frame=NSRect(x:24,y:20,width:652,height:550);root.addSubview(page);w.center();render()
+        page.frame=NSRect(x:24,y:20,width:652,height:550);root.addSubview(page);w.center();render();backgroundTimer=Timer.scheduledTimer(withTimeInterval:5,repeats:true){[weak self] _ in guard let self=self,self.window?.isVisible==true,self.tabs.selectedSegment==4 else{return};self.render()}
     }
     required init?(coder:NSCoder){fatalError()}
+    deinit{backgroundTimer?.invalidate()}
     func show(_ tab:Int=0){tabs.selectedSegment=tab;render();window?.makeKeyAndOrderFront(nil);NSApp.activate(ignoringOtherApps:true);if tab==0{guardian?.refreshMetrics();checkConnection()}}
     @objc func changeTab(){render();if tabs.selectedSegment==0{checkConnection()}}
     @discardableResult func label(_ text:String,_ rect:NSRect,size:CGFloat=13,color:NSColor = .secondaryLabelColor)->NSTextField{let l=NSTextField(wrappingLabelWithString:text);l.font = .systemFont(ofSize:size);l.textColor=color;l.frame=rect;page.addSubview(l);return l}
     @discardableResult func button(_ title:String,_ key:String,_ rect:NSRect)->NSButton{let b=NSButton(title:title,target:self,action:#selector(action(_:)));b.identifier=NSUserInterfaceItemIdentifier(key);b.frame=rect;b.bezelStyle = .rounded;page.addSubview(b);return b}
-    func textArea(_ text:NSTextView,_ rect:NSRect,editable:Bool=false){let scroll=NSScrollView(frame:rect);scroll.hasVerticalScroller=true;scroll.borderType = .bezelBorder;text.isEditable=editable;text.isSelectable=true;text.isRichText=false;text.font = .systemFont(ofSize:13);text.textColor = .labelColor;text.backgroundColor=NSColor(calibratedWhite:0.13,alpha:1);text.textContainerInset=NSSize(width:12,height:12);text.isVerticallyResizable=true;text.isHorizontallyResizable=false;text.autoresizingMask = [.width];text.textContainer?.widthTracksTextView=true;text.frame=NSRect(x:0,y:0,width:rect.width-16,height:rect.height);scroll.documentView=text;page.addSubview(scroll)}
+    func textArea(_ text:NSTextView,_ rect:NSRect,editable:Bool=false){let scroll=NSScrollView(frame:rect);scroll.hasVerticalScroller=true;scroll.borderType = .bezelBorder;text.isEditable=editable;text.isSelectable=true;text.isRichText=false;text.font = .systemFont(ofSize:15);text.textColor = .labelColor;text.backgroundColor=NSColor(calibratedWhite:0.13,alpha:1);text.textContainerInset=NSSize(width:12,height:12);text.isVerticallyResizable=true;text.isHorizontallyResizable=false;text.autoresizingMask = [.width];text.textContainer?.widthTracksTextView=true;text.frame=NSRect(x:0,y:0,width:rect.width-16,height:rect.height);scroll.documentView=text;page.addSubview(scroll)}
     func render(){page.subviews.forEach{$0.removeFromSuperview()};cards=[]
         switch tabs.selectedSegment {
         case 0:
@@ -38,7 +40,7 @@ final class CareCenter:NSWindowController {
         case 1:
             label("把眼前的材料交给露娜",NSRect(x:0,y:510,width:652,height:30),size:22,color:.labelColor)
             label("先放入文字或文件，再交给配置的 LLM。图片取字、PDF 提取在本机完成。",NSRect(x:0,y:479,width:652,height:25))
-            task.frame=NSRect(x:0,y:440,width:220,height:30);if task.numberOfItems==0{task.addItems(withTitles:["日文 → 中文","中文 → 日文","日语学术润色","中日双语摘要","唐话先行研究笔记","拆解今天的任务","解释电脑状态"])};page.addSubview(task)
+            task.frame=NSRect(x:0,y:440,width:220,height:30);if task.numberOfItems==0{task.addItems(withTitles:["其他语言 → 中文","中文 → 日文","日语学术润色","中日双语摘要","唐话先行研究笔记","拆解今天的任务","解释电脑状态"])};page.addSubview(task)
             button("粘贴文字","paste",NSRect(x:232,y:440,width:112,height:30));button("打开 PDF / 图片","import",NSRect(x:352,y:440,width:160,height:30));button("开始处理","assist",NSRect(x:520,y:440,width:132,height:30)).isEnabled = !taskBusy
             textArea(input,NSRect(x:0,y:257,width:652,height:171),editable:true)
             toolStatus.frame=NSRect(x:0,y:224,width:652,height:26);toolStatus.maximumNumberOfLines=2;toolStatus.font = .systemFont(ofSize:12);toolStatus.textColor = .secondaryLabelColor;page.addSubview(toolStatus)
@@ -51,25 +53,43 @@ final class CareCenter:NSWindowController {
             button(guardian?.life?.enabled==true ? "暂停自主日常":"恢复自主日常","lifeToggle",NSRect(x:0,y:80,width:150,height:32));button("一起专注","focus",NSRect(x:164,y:80,width:140,height:32));button("聊一会儿","chat",NSRect(x:318,y:80,width:140,height:32));button("摸摸头","pat",NSRect(x:472,y:80,width:180,height:32))
             label("本地反应每 15 秒观察一次 · LLM 最多每 2 分钟规划一次 · 主动气泡至少间隔 4 分钟",NSRect(x:0,y:20,width:652,height:44),size:12);refreshLife()
         case 4:
-            label("露娜正在做什么",NSRect(x:0,y:510,width:652,height:30),size:22,color:.labelColor)
             let o=guardian
-            let speech=o?.voicePaused==true ? "暂停十五分钟内" : o?.muted==true ? "已静音" : "可用"
-            let observation=readJSON("screen-observation.json")["status"] as? String ?? "尚无观察回执"
-            textArea(details,NSRect(x:0,y:180,width:652,height:300))
-            details.font = .systemFont(ofSize:16)
-            details.string="语音："+speech+"\n\n窗口观察："+observation+"\n\n电脑巡检："+(o?.watching==true ? "开启":"暂停")+"\n\n聊天："+(o?.companion.chatBusy==true ? "正在回应":"空闲")+"\n\n课程提醒：露娜运行且电脑未锁屏时检查。具体任务结果可在任务记录查看。"
-            button(o?.voicePaused==true ? "恢复语音":"暂停语音 15 分钟","pauseVoice",NSRect(x:0,y:124,width:180,height:32))
-            button("开始新话题","newTopic",NSRect(x:194,y:124,width:140,height:32))
-            button("任务记录","taskNotebook",NSRect(x:348,y:124,width:140,height:32))
-            button("刷新状态","background",NSRect(x:502,y:124,width:150,height:32))
-            button(o?.studyEnabled==true ? "暂停窗口观察":"开启窗口观察","observe",NSRect(x:0,y:74,width:180,height:32))
-            label("开始新话题会归档当前聊天；保留长期记忆、运势和正在执行的任务。",NSRect(x:0,y:16,width:652,height:40))
+            label("☾  露娜的工作台",NSRect(x:0,y:505,width:480,height:36),size:26,color:.labelColor)
+            label("陪伴有分寸，正在做的事也看得清楚。",NSRect(x:0,y:476,width:500,height:24),size:14)
+            let stamp=DateFormatter.localizedString(from:Date(),dateStyle:.none,timeStyle:.short)
+            label("更新于 "+stamp,NSRect(x:500,y:511,width:152,height:20),size:12)
+            let speech=o?.voicePaused==true ? "暂时休息" : o?.muted==true ? "已静音" : "语音可用"
+            let observation=readJSON("screen-observation.json")["status"] as? String ?? "等待观察回执"
+            statusCard("waveform","日语语音",speech,o?.voicePaused==true ? "十五分钟后自动恢复" : "保留日语声音与中文字幕",NSRect(x:0,y:310,width:318,height:144),accent:.systemPurple)
+            statusCard("eye","窗口观察",o?.studyEnabled==true ? "已开启":"已暂停",observation,NSRect(x:334,y:310,width:318,height:144),accent:.systemTeal)
+            statusCard("heart.text.square","电脑照看",o?.watching==true ? "自动巡检中":"巡检已暂停","检查电脑负载，实际处理结果保留在照看记录。",NSRect(x:0,y:150,width:318,height:144),accent:.systemGreen)
+            let job=readJSON("codex-status.json")
+            let state=job["state"] as? String ?? ""
+            let taskLabel=["queued":"任务排队中","running":"任务执行中","completed":"任务已返回","failed":"任务未完成","cancelled":"任务已取消"][state] ?? "暂无后台任务"
+            statusCard("tray.full","对话与任务",o?.companion.chatBusy==true ? "正在回应你":taskLabel,"新话题保留长期记忆、今日运势与进行中的任务。",NSRect(x:334,y:150,width:318,height:144),accent:.systemOrange)
+            button(o?.voicePaused==true ? "恢复语音":"语音休息 15 分钟","pauseVoice",NSRect(x:10,y:320,width:170,height:28))
+            button(o?.studyEnabled==true ? "暂停观察":"开启观察","observe",NSRect(x:344,y:320,width:140,height:28))
+            button(o?.watching==true ? "暂停巡检":"恢复巡检","watch",NSRect(x:10,y:160,width:140,height:28))
+            button("查看任务","taskNotebook",NSRect(x:344,y:160,width:140,height:28))
+            button("开始新话题","newTopic",NSRect(x:0,y:86,width:154,height:34))
+            button("学习与翻译","studyTools",NSRect(x:166,y:86,width:154,height:34))
+            button("刷新状态","background",NSRect(x:498,y:86,width:154,height:34))
+            label("课程提醒会在露娜运行、电脑未锁屏时检查。状态每五秒更新。",NSRect(x:0,y:27,width:652,height:36),size:13)
         default:
             label("异常发生后，她做了什么",NSRect(x:0,y:510,width:652,height:30),size:22,color:.labelColor)
             label("待复检 → 仍需处理 / 已缓解。保留观察证据，不把尝试处理写成修复成功。",NSRect(x:0,y:469,width:652,height:30))
             textArea(details,NSRect(x:0,y:76,width:652,height:380));details.string="正在读取记录…"
             button("更新记录","reports",NSRect(x:0,y:20,width:130,height:32));button("恢复上次整理","restore",NSRect(x:144,y:20,width:150,height:32));button("系统保护检查","security",NSRect(x:308,y:20,width:150,height:32));button(guardian?.watching==true ? "暂停巡检":"恢复巡检","watch",NSRect(x:472,y:20,width:180,height:32));loadReports()
         }
+    }
+    func statusCard(_ icon:String,_ title:String,_ value:String,_ note:String,_ rect:NSRect,accent:NSColor){
+        let box=NSView(frame:rect);box.wantsLayer=true;box.layer?.cornerRadius=16
+        box.layer?.backgroundColor=NSColor(calibratedRed:0.14,green:0.15,blue:0.20,alpha:1).cgColor
+        box.layer?.borderWidth=1;box.layer?.borderColor=NSColor.white.withAlphaComponent(0.08).cgColor;page.addSubview(box)
+        let image=NSImageView(frame:NSRect(x:16,y:110,width:19,height:19));image.image=NSImage(systemSymbolName:icon,accessibilityDescription:title);image.contentTintColor=accent;box.addSubview(image)
+        func line(_ text:String,_ y:CGFloat,_ height:CGFloat,_ size:CGFloat,_ color:NSColor,_ weight:NSFont.Weight){let l=NSTextField(wrappingLabelWithString:text);l.frame=NSRect(x:16,y:y,width:286,height:height);l.font = .systemFont(ofSize:size,weight:weight);l.textColor=color;box.addSubview(l)}
+        let caption=NSTextField(labelWithString:title);caption.frame=NSRect(x:43,y:109,width:250,height:22);caption.font = .systemFont(ofSize:13,weight:.medium);caption.textColor = .secondaryLabelColor;box.addSubview(caption)
+        line(value,78,30,21,.labelColor,.semibold);line(note,42,34,12,.secondaryLabelColor,.regular)
     }
     func refreshMetrics(){guard tabs.selectedSegment==0,let o=guardian else{return};let d=o.lastMetrics
         let pressure=d["memoryPressure"] as? Int;let cpu=d["cpu"] as? Double;let free=d["diskFree"] as? Double;let health=d["health"] as? [String:Any] ?? [:];let active=health["active"] as? [[String:Any]] ?? []
@@ -95,6 +115,7 @@ final class CareCenter:NSWindowController {
         case "newTopic":guardian?.startNewTopic();window?.orderOut(nil)
         case "taskNotebook":guardian?.showNotebook(2)
         case "background":render()
+        case "studyTools":show(1)
         case "observe":guardian?.nativeCall("toggleStudy"){[weak self] _ in self?.render()}
         case "refresh":guardian?.refreshMetrics();refreshMetrics()
         case "threshold":guardian?.guardSettings()
@@ -123,7 +144,7 @@ final class CareCenter:NSWindowController {
     func importFile(){guard !taskBusy else{return};let panel=NSOpenPanel();panel.allowedContentTypes=[.pdf,.png,.jpeg,.heic,.plainText];panel.allowsMultipleSelection=false;guard panel.runModal() == .OK,let url=panel.url else{return};toolStatus.stringValue="正在本机提取文字…";taskBusy=true
         DispatchQueue.global(qos:.utility).async{var text="";var note="";do{
             let size=(try url.resourceValues(forKeys:[.fileSizeKey])).fileSize ?? 0;guard size<30_000_000 else{throw NSError(domain:"文件超过 30 MB，请拆分后读取",code:1)}
-            if url.pathExtension.lowercased()=="pdf",let pdf=PDFDocument(url:url){for i in 0..<min(12,pdf.pageCount){text+="[页 \(i+1)]\n"+(pdf.page(at:i)?.string ?? "")+"\n";if text.count>11000{break}};note="已提取 PDF 开头最多 12 页；扫描页需先转图片取字。"}
+            if url.pathExtension.lowercased()=="pdf",let pdf=PDFDocument(url:url){for i in 0..<min(12,pdf.pageCount){if let page=pdf.page(at:i){text+=try paperPageText(page,index:i)+"\n"};if text.count>11000{break}};note="已提取 PDF 开头最多 12 页；扫描或损坏文本层已尝试本机 OCR，标注页码与待核信息。"}
             else if ["txt","md"].contains(url.pathExtension.lowercased()){text=try String(contentsOf:url,encoding:.utf8);note="已读入文本。"}
             else {guard let src=CGImageSourceCreateWithURL(url as CFURL,nil),let image=CGImageSourceCreateThumbnailAtIndex(src,0,[kCGImageSourceCreateThumbnailFromImageAlways:true,kCGImageSourceThumbnailMaxPixelSize:1800] as CFDictionary) else{throw NSError(domain:"图片无法读取",code:2)};let req=VNRecognizeTextRequest();req.recognitionLevel = .accurate;req.recognitionLanguages=["ja-JP","zh-Hans","en-US"];try VNImageRequestHandler(cgImage:image).perform([req]);text=(req.results ?? []).compactMap{$0.topCandidates(1).first?.string}.joined(separator:"\n");note="图片取字完成，请核对识别错误。"}
             if text.count>12000{note+=" 已截取前 12000 字。"};if text.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty{note="未提取到可读文字。"}

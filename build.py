@@ -8,10 +8,11 @@ if not (assets/'spritesheet.webp').exists() and (ROOT/'assets.zip').exists():
  with zipfile.ZipFile(ROOT/'assets.zip') as z:z.extractall(ROOT)
 app=Path(os.environ.get('LUNA_BUILD_DIR',str(Path.home()/'Library/Caches/LunaGuardianBuild')))/'露娜电脑管家.app';contents=app/'Contents';resources=contents/'Resources';binary=contents/'MacOS'
 resources.mkdir(parents=True,exist_ok=True);binary.mkdir(exist_ok=True)
-swift=['main','Bubble','Glass','Guard','Fortune','Center','Life','Scene','Notebook','Daily','AppActions']
+swift=['main','Bubble','Glass','Guard','Fortune','Center','Life','Scene','Notebook','Daily','AppActions','MusicSearch','PaperText']
 command=['nice','-n','15','swiftc']+[str(ROOT/'src'/f'{f}.swift') for f in swift]+['-o',str(binary/'LunaGuardian')]
 for framework in ['AppKit','QuartzCore','ImageIO','CoreLocation','Vision','AVFoundation','PDFKit','UniformTypeIdentifiers','ScreenCaptureKit']:command+=['-framework',framework]
 subprocess.run(command,check=True)
+subprocess.run(['swiftc',str(ROOT/'src/PaperText.swift'),str(ROOT/'tools/paper-extract/main.swift'),'-o',str(resources/'LunaPaperText'),'-framework','AppKit','-framework','PDFKit','-framework','Vision'],check=True)
 for name in ['backend.py','speech.py','synthesize_once.py','handoff.py','delegation.py','local_actions.py','course_schedule.py','session_controls.py','daily_actions.py','app_actions.py','paper_tools.py','reading.py','notebook.py','web_tools.py','maintenance.py','github_watch.py','persona_luna.txt','index.html']:shutil.copy2(ROOT/'src'/name,resources/name)
 for name in ['spritesheet.webp','fortunes.json']:shutil.copy2(assets/name,resources/name)
 for name in ['actions','voices']:shutil.copytree(assets/name,resources/name,dirs_exist_ok=True)
