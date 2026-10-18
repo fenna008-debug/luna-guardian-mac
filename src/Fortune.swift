@@ -14,8 +14,9 @@ final class FortuneAnimation {
     func start(){
         guard let owner=owner else{return};owner.life?.stopWalking();owner.speechGeneration=UUID();let pet=owner.petView!
         pet.scene.isHidden=true;owner.fortuneBusy=true;owner.stateToken=UUID();pet.prop.string="";pet.character.removeAllAnimations()
-        rig.frame=pet.bounds;pet.layer?.addSublayer(rig)
-        pet.say("让我替你摇一支。别把作业全交给运气。",seconds:4)
+        rig.frame=pet.bounds;pet.layer?.addSublayer(rig);pet.character.opacity=1
+        writeJSON(["phase":"shaking","title":row["title"] ?? "","at":Date().timeIntervalSince1970],"fortune-playback.json")
+        pet.say("让我把这支签展开给你看。今天的签，不会偷偷换掉。",seconds:4)
         if owner.criticalMode{reveal();return}
         pet.playAction("draw",duration:3.8,indices:[0,1,2,3,2,3,4,5])
         DispatchQueue.main.asyncAfter(deadline:.now()+3.8){[weak self] in self?.reveal()}
@@ -51,11 +52,7 @@ extension Guardian {
     func drawFortune(_ requestID:String,preview:String?=nil){
         guard !fortuneBusy else{reply(requestID,"这支签还没收好，稍等一下。",ok:false);return}
         guard let data=try? Data(contentsOf:resources.appendingPathComponent("fortunes.json")),let rows=try? JSONSerialization.jsonObject(with:data) as? [[String:String]],!rows.isEmpty else{reply(requestID,"签文资源未准备好。",ok:false);return}
-        let format=DateFormatter();format.dateFormat="yyyy-MM-dd";let today=format.string(from:Date())
-        let saved=readJSON("fortune.json");let selected:[String:String]
-        if let preview=preview,let row=rows.first(where:{$0["id"]==preview}){selected=row}
-        else if saved["date"] as? String==today,let row=rows.first(where:{$0["title"]==saved["title"] as? String}){selected=row}
-        else {selected=Self.weightedFortune(rows,roll:Int.random(in:0..<100));var record:[String:Any]=selected;record["date"]=today;writeJSON(record,"fortune.json")}
+        let selected=dailyFortune();companion.refreshFortuneBanner()
         let animation=FortuneAnimation(owner:self,row:selected){[weak self] result in self?.reply(requestID,result)};fortuneAnimation=animation;animation.start()
     }
 }

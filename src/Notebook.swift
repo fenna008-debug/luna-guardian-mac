@@ -2,7 +2,7 @@ import AppKit
 
 final class LunaNotebook:NSWindowController {
     weak var guardian:Guardian?
-    let tabs=NSSegmentedControl(labels:["读书手记","记忆","任务清单"],trackingMode:.selectOne,target:nil,action:nil)
+    let tabs=NSSegmentedControl(labels:["读书手记","记忆","任务清单","执行记录"],trackingMode:.selectOne,target:nil,action:nil)
     let picker=NSPopUpButton(),body=NSTextView(),edit=NSTextField(),status=NSPopUpButton(),hint=NSTextField(labelWithString:"")
     let add=NSButton(title:"添加",target:nil,action:nil),change=NSButton(title:"保存修改",target:nil,action:nil),remove=NSButton(title:"删除",target:nil,action:nil),source=NSButton(title:"打开原文",target:nil,action:nil)
     var rows:[[String:Any]]=[]
@@ -33,10 +33,10 @@ final class LunaNotebook:NSWindowController {
         add.title=section==0 ? "给露娜留言":"添加";edit.placeholderString=section==0 ? "这段书或她的感想，你怎么看？":"写下想记住的事，或添加待办任务"
         remove.title=section==3 ? "清空记录":"删除"
         if section==0 {
-            let data=try? Data(contentsOf:support.appendingPathComponent("reading-log.json"));rows=(data.flatMap{try? JSONSerialization.jsonObject(with:$0)} as? [[String:Any]]) ?? []
-            hint.stringValue="只记录实际取得的节选；感想与原文分开显示。点击标题可查看此前的阅读。";fill()
+            let data=try? Data(contentsOf:support.appendingPathComponent("reading-log.json"));rows=((data.flatMap{try? JSONSerialization.jsonObject(with:$0)} as? [[String:Any]]) ?? []).filter{lunaDay(Date(timeIntervalSince1970:$0["time"] as? Double ?? 0))==lunaDay()}
+            hint.stringValue="只保留当天实际读到的节选、译文和留言；凌晨4点清除前一天记录。";fill()
         } else if section==3 {
-            let d=readJSON("tool-events.json");rows=d["items"] as? [[String:Any]] ?? [];hint.stringValue="仅记录工具名称、结果和耗时，不显示参数。保留 7 天，最多 100 条。";fill()
+            let d=readJSON("task-cards.json");rows=d["items"] as? [[String:Any]] ?? [];hint.stringValue="这里只显示实际执行状态；待办清单与执行结果分开。最多保留 100 条，不保存请求正文。";fill()
         } else {
             hint.stringValue=section==1 ? "明确保存的记忆才进入长期记忆；可以修改或删除。":"待办不代表已执行。仅按实际结果或你的确认标为完成。"
             guardian?.run("notebook",["op":"list","kind":kind]){[weak self] r in guard let self=self,self.tabs.selectedSegment==section else{return};self.rows=(r["data"] as? [String:Any])?["items"] as? [[String:Any]] ?? [];self.fill()}
@@ -50,6 +50,12 @@ final class LunaNotebook:NSWindowController {
             let stamp=(r["time"] as? Double).map{DateFormatter.localizedString(from:Date(timeIntervalSince1970:$0),dateStyle:.long,timeStyle:.medium)} ?? "未记录"
             body.string="联网阅读时间："+stamp+"（本机时区）\n\n"+(r["title"] as? String ?? "")+"\n"+(r["scope"] as? String ?? "")+"\n\n露娜的感想\n"+(r["reflection"] as? String ?? "未生成")+"\n\n原文节选\n"+(r["quote"] as? String ?? "")+"\n\n中文译文（模型翻译）\n"+(r["translation"] as? String ?? "译文尚未生成。")+"\n\n来源\n"+(r["url"] as? String ?? "")}
         else if tabs.selectedSegment==3 {body.string=(r["tool"] as? String ?? "工具")+"\n结果："+(r["outcome"] as? String ?? "未知")+"\n耗时：\(r["seconds"] ?? 0) 秒\n时间："+DateFormatter.localizedString(from:Date(timeIntervalSince1970:r["at"] as? Double ?? 0),dateStyle:.medium,timeStyle:.medium)}
+        else if tabs.selectedSegment==1 {
+            edit.stringValue=r["text"] as? String ?? ""
+            func date(_ key:String)->String{guard let n=r[key] as? Double else{return "尚无记录"};return DateFormatter.localizedString(from:Date(timeIntervalSince1970:n),dateStyle:.medium,timeStyle:.short)}
+            let used=(r["used_version"] as? Double)==(r["updated"] as? Double) && r["last_used"] != nil
+            body.string=edit.stringValue+"\n\n状态：已保存在本机长期记忆\n保存时间："+date("created")+"\n更新时间："+date("updated")+"\n来源："+(r["source"] as? String ?? "旧版来源未记录")+"\n\n"+(used ? "当前版本最近送入回答上下文："+date("last_used"):"尚无当前版本的调用记录（旧版未追踪）")+"\n送入上下文不代表模型一定引用。每日对话换日不会删除这里的记忆。"
+        }
         else {edit.stringValue=r["text"] as? String ?? "";body.string=edit.stringValue;let values=["pending","in_progress","done"];status.selectItem(at:values.firstIndex(of:r["status"] as? String ?? "pending") ?? 0)}
         if tabs.selectedSegment==0 {
             if r["translation"] == nil,let key=r["evidenceHash"] as? String,!translationAttempts.contains(key),window?.isVisible==true {
@@ -78,6 +84,6 @@ final class LunaNotebook:NSWindowController {
         }
     }
     @objc func updateItem(){mutate("update")}
-    @objc func deleteItem(){if tabs.selectedSegment==3{writeJSON(["items":[]],"tool-events.json");reload()}else{mutate("delete")}}
+    @objc func deleteItem(){if tabs.selectedSegment==3{writeJSON(["items":[]],"task-cards.json");reload()}else{mutate("delete")}}
     @objc func openSource(){guard rows.indices.contains(picker.indexOfSelectedItem),let raw=rows[picker.indexOfSelectedItem]["url"] as? String,let url=URL(string:raw),["http","https"].contains(url.scheme ?? "") else{return};NSWorkspace.shared.open(url)}
 }

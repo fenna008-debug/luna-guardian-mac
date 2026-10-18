@@ -46,7 +46,7 @@ final class CareCenter:NSWindowController {
             button("复制结果","copy",NSRect(x:0,y:15,width:112,height:32));button("保存笔记","save",NSRect(x:120,y:15,width:112,height:32));button("打开 Zotero","zotero",NSRect(x:240,y:15,width:120,height:32));button(coffee?.isRunning==true ? "停止防休眠":"防休眠 30 分钟","coffee",NSRect(x:368,y:15,width:158,height:32));button("连接设置","model",NSRect(x:534,y:15,width:118,height:32))
         case 2:
             lifeTitle.frame=NSRect(x:0,y:470,width:652,height:70);lifeTitle.font = .systemFont(ofSize:24,weight:.medium);lifeTitle.maximumNumberOfLines=2;page.addSubview(lifeTitle)
-            label("她会散步、喝茶、翻书，也会联网读一小段公开资料。\n屏幕陪伴开启后，每 3 分钟查看当前窗口；锁屏或内存紧张时暂停。",NSRect(x:0,y:410,width:652,height:50));button("打开独立读书手记","readingSource",NSRect(x:0,y:375,width:210,height:28))
+            label("她会散步、喝茶、翻书，也会联网读一小段公开资料。\n屏幕陪伴开启后，每 30 秒检查当前窗口，切换窗口后约 8 秒检查；锁屏或内存紧张时暂停。",NSRect(x:0,y:410,width:652,height:50));button("打开独立读书手记","readingSource",NSRect(x:0,y:375,width:210,height:28))
             textArea(details,NSRect(x:0,y:132,width:652,height:237))
             button(guardian?.life?.enabled==true ? "暂停自主日常":"恢复自主日常","lifeToggle",NSRect(x:0,y:80,width:150,height:32));button("一起专注","focus",NSRect(x:164,y:80,width:140,height:32));button("聊一会儿","chat",NSRect(x:318,y:80,width:140,height:32));button("摸摸头","pat",NSRect(x:472,y:80,width:180,height:32))
             label("本地反应每 15 秒观察一次 · LLM 最多每 2 分钟规划一次 · 主动气泡至少间隔 4 分钟",NSRect(x:0,y:20,width:652,height:44),size:12);refreshLife()

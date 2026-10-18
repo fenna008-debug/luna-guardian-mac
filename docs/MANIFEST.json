@@ -1,13 +1,13 @@
 [
   {
     "path": ".gitignore",
-    "sha256": "188f9f727e4be7ed3e536c8532dada4240299a2eafb832f747b44ffbc1e09fac",
-    "bytes": 592
+    "sha256": "d6f4f7310e531ebd44a3761de8842d5767e71826bcdc2d85f516df6f3a6dd5e0",
+    "bytes": 746
   },
   {
     "path": "README.md",
-    "sha256": "8ee9dac78dfeb23c85a5092605235982c2844ff445e2c63769d380b6e62c889a",
-    "bytes": 3377
+    "sha256": "6058edfc8ff8234b6ff5b134787a0e8be13aff84545633990e218538de7d340c",
+    "bytes": 4716
   },
   {
     "path": "assets/actions/daily.png",
@@ -91,8 +91,8 @@
   },
   {
     "path": "build.py",
-    "sha256": "f3bf6be7ff03c13749c162f58296ce94777f39b7993fd292eb7dad5f07b9a90d",
-    "bytes": 2392
+    "sha256": "8c6d6b816e7ab6a3b54047a162d81ce01b4202e9ae2f11380b7cb2766136f4ec",
+    "bytes": 2400
   },
   {
     "path": "docs/CONFIGURATION.md",
@@ -101,13 +101,13 @@
   },
   {
     "path": "docs/REFERENCES.md",
-    "sha256": "c936e6a1d43bab5a747ffdf00b70df471120a7433b51ddf20e8062bea62a003b",
-    "bytes": 635
+    "sha256": "d015b8d668e749d9d509542d45e0a163dadc35c61c74aecf875d30a7ebf032ff",
+    "bytes": 1120
   },
   {
     "path": "docs/SCENARIOS.md",
-    "sha256": "e53cc05ddb596e560fb9656d9794aab679dd3b294a7d6c735884224fe197d34d",
-    "bytes": 3981
+    "sha256": "aa10172bcdb01ebb303099557ccacbc393a6c8dbca9f5c9fa79293cc9fb21427",
+    "bytes": 4315
   },
   {
     "path": "docs/SECURITY.md",
@@ -115,9 +115,14 @@
     "bytes": 1220
   },
   {
+    "path": "docs/UPDATE-1.9.0.md",
+    "sha256": "57ab86a2ea49702ff52c84b596ef045d07dd790e1534d956437e1c904b805dad",
+    "bytes": 2377
+  },
+  {
     "path": "docs/VERIFICATION.md",
-    "sha256": "670a8321812a2effaedad2e536c60a16b67bacc192dcf84b11982272d9326025",
-    "bytes": 2992
+    "sha256": "1f153b661bdda601bc3401816bea9a29b00d08eb70c1c1cad793be4a3500f5aa",
+    "bytes": 3311
   },
   {
     "path": "examples/model.example.json",
@@ -176,13 +181,18 @@
   },
   {
     "path": "src/Bubble.swift",
-    "sha256": "1c7fee9d00cf32ddae4ebcb9033fef5e95ea60807d5cee9174f6cf2aa3ecc79c",
-    "bytes": 14354
+    "sha256": "99ac804171a29ed64fbeea69a6ae5afc989adeca03922a1b79dbbcd14ff84521",
+    "bytes": 17134
   },
   {
     "path": "src/Center.swift",
-    "sha256": "0a83580b09d2b23aee1126467c6425ec9131e9318d274cb64bf54e419c7a7ae3",
-    "bytes": 18343
+    "sha256": "4502a3dac0aaf7e901ce8924378e77793fdfd50c80e4c8872ca2a73de1f1cfc8",
+    "bytes": 18374
+  },
+  {
+    "path": "src/Daily.swift",
+    "sha256": "b6e67ea912b2c0dee29ff61b403dd6f377a68ed3734ce713fd1fc844666b01e4",
+    "bytes": 4758
   },
   {
     "path": "src/ExportAnimation.swift",
@@ -191,8 +201,8 @@
   },
   {
     "path": "src/Fortune.swift",
-    "sha256": "814a7cb3491cc464810e2d5a862705e70b7314fe33bdb500ec94578d7aa944a9",
-    "bytes": 5370
+    "sha256": "98955c0ee3297b6e0cdb8e5e87337cd955935c590e180f4d5d5d7db634c28e7c",
+    "bytes": 5044
   },
   {
     "path": "src/Glass.swift",
@@ -206,23 +216,23 @@
   },
   {
     "path": "src/Life.swift",
-    "sha256": "e4cffa6565edeeb77640671992053b32a4a8de22bc96897f36da27b63fcf3025",
-    "bytes": 15563
+    "sha256": "b34f2a6eea977e82d60a8e4e0a16da70e927dff78014387b9b635b08e777d463",
+    "bytes": 15745
   },
   {
     "path": "src/Notebook.swift",
-    "sha256": "9884a704ef8e564c631ae0f1e2d1079b747c21a8dfe1b59eb533edabb6d8b5ed",
-    "bytes": 9845
+    "sha256": "b521bd7207e96e9632a7653aacfe32d66edec46a6e0f329fcffe8574f32dd391",
+    "bytes": 10838
   },
   {
     "path": "src/Scene.swift",
-    "sha256": "903c0638208f8bfb4dc721c5f324bee1e9af41fd403530f9dd1c20d1ca2f4e70",
-    "bytes": 5168
+    "sha256": "e08009ee477da996727f48f4416696d287850a4068597db24ffc8a6be8e697ae",
+    "bytes": 5216
   },
   {
     "path": "src/backend.py",
-    "sha256": "f4d463a1edb8323504a47847725ed6682315eeb44fee2060695e6e947ca56515",
-    "bytes": 32666
+    "sha256": "2ed3741e4cee48c4d3bf5a15c443379804c695c6abf5ec3eef2b930206381315",
+    "bytes": 34212
   },
   {
     "path": "src/github_watch.py",
@@ -241,8 +251,8 @@
   },
   {
     "path": "src/main.swift",
-    "sha256": "3c864cfafb7440612d2cb109efc098768792d5153caa19008a9685ff658fc4a9",
-    "bytes": 46325
+    "sha256": "d32e978e906f21cd8d3ba74a464d4b6bb15d7fe2be6c228f3920564e7cd0b0fc",
+    "bytes": 54331
   },
   {
     "path": "src/maintenance.py",
@@ -256,13 +266,13 @@
   },
   {
     "path": "src/notebook.py",
-    "sha256": "c13a43a3eeffe9ec7b761a85ce54b1cb3417ec5f6df225af9fd68ce6450cc760",
-    "bytes": 3941
+    "sha256": "c15434730f839c19d8b7364683788bcfc858a0ae32f7aaa3c897819a7f7c73e7",
+    "bytes": 4893
   },
   {
     "path": "src/persona_luna.txt",
-    "sha256": "b063530741cb93c7c395f165394aeb7f05572d95cc6d5c0853fe22a6dc6e07b4",
-    "bytes": 2831
+    "sha256": "0a96e246d5aa0c2d0903a9c2c7224cada4975826db018c1e91229284e1af485b",
+    "bytes": 3529
   },
   {
     "path": "src/reading.py",
@@ -283,6 +293,11 @@
     "path": "src/test_backend.py",
     "sha256": "32b884e092f08074339b898f1f7d5574a14c9645861b37a91d7ebe6bef105d89",
     "bytes": 11004
+  },
+  {
+    "path": "src/test_daily_memory.py",
+    "sha256": "71b3e445674c53769a15e70ed4534cbe83ca2d3f833e1e4ac2060b206067b2be",
+    "bytes": 2082
   },
   {
     "path": "src/test_github_watch.py",

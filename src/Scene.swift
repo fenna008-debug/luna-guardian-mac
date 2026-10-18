@@ -48,7 +48,7 @@ extension Guardian {
         func synth(_ line:[String:Any]){
             guard self.speechGeneration==token,!self.muted,!self.criticalMode,!self.isLocked() else{self.speechBusy=false;return}
             self.run("speak",line){[weak self] r in
-                guard let self=self else{return};self.speechBusy=false
+                guard let self=self else{return};self.speechBusy=false;guard self.speechGeneration==token else{return}
                 if r["ok"] as? Bool != true{let error=r["error"] as? String ?? "语音未完成";writeJSON(["kind":"dialogue","started":false,"error":error,"at":Date().timeIntervalSince1970],"voice-playback.json");if force{self.petView.say(error,seconds:12)}}
                 guard self.speechGeneration==token,!self.muted,!self.criticalMode,!self.isLocked(),!self.fortuneBusy,let d=r["data"] as? [String:Any],let path=d["path"] as? String,let a=try? AVAudioPlayer(contentsOf:URL(fileURLWithPath:path)) else{return}
                 self.audio?.stop();self.audio=a;a.delegate=self;a.volume=0.65

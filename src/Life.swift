@@ -39,25 +39,25 @@ final class LunaLife {
         }
         guard !busy,!o.companion.chatBusy,Date()>nextPlan,o.workerQueue.operationCount==0 else{return}
         guard llmConfigured() else{source="本地日常 · 等待 LLM 连接";o.center?.refreshLife();return}
-        nextPlan=Date().addingTimeInterval(120);busy=true;let activityAtRequest=lastChange
+        nextPlan=Date().addingTimeInterval(120);busy=true;let activityAtRequest=lastChange;let turn=o.turnGeneration
         let context:[String:Any]=["app":app,"time":DateFormatter.localizedString(from:Date(),dateStyle:.short,timeStyle:.short),"weather":o.lastWeather["state"] ?? "未取得","health":o.resourceLimited ? "露娜轻量模式":"无已知资源警告","activity":activity,"reading":(reading["title"] as? String ?? "尚未阅读")+" "+(reading["quote"] as? String ?? "")]
         o.run("life",context){[weak self] r in guard let self=self,let o=self.owner else{return};self.busy=false
-            guard self.enabled,!o.isLocked(),!o.fortuneBusy,!o.companion.chatBusy,self.lastChange==activityAtRequest else{return}
+            guard self.enabled,!o.isLocked(),!o.fortuneBusy,!o.companion.chatBusy,self.lastChange==activityAtRequest,o.turnGeneration==turn else{return}
             if let d=r["data"] as? [String:Any]{self.apply(d["activity"] as? String ?? "安静陪伴",d["action"] as? String ?? "idle",line:d["line"] as? String ?? "",model:true)}else{self.source="本地日常 · LLM 暂未连通";self.nextPlan=Date().addingTimeInterval(300);o.center?.refreshLife()}
         }
     }
     func loadReading(){
-        if let d=try? Data(contentsOf:support.appendingPathComponent("reading-log.json")),let rows=try? JSONSerialization.jsonObject(with:d) as? [[String:Any]]{reading=rows.first ?? [:]}
+        if let d=try? Data(contentsOf:support.appendingPathComponent("reading-log.json")),let rows=try? JSONSerialization.jsonObject(with:d) as? [[String:Any]]{reading=rows.first(where:{lunaDay(Date(timeIntervalSince1970:$0["time"] as? Double ?? 0))==lunaDay()}) ?? [:]}
     }
     func fetchReading(){
-        guard let o=owner else{return};readingBusy=true;nextRead=Date().addingTimeInterval(600)
+        guard let o=owner else{return};let turn=o.turnGeneration;readingBusy=true;nextRead=Date().addingTimeInterval(600)
         o.run("readOnline"){[weak self] r in
             guard let self=self,let o=self.owner else{return};self.readingBusy=false
             guard let d=r["data"] as? [String:Any] else{self.note("联网阅读暂未成功，未增加已读记录。");return}
             self.reading=d
             o.petView.markReadingUnread(d["evidenceHash"] as? String ?? "")
             o.notebook?.reload()
-            guard self.enabled,!o.isLocked(),!o.fortuneBusy,!o.companion.chatBusy,!self.walking else{return}
+            guard self.enabled,o.turnGeneration==turn,!o.isLocked(),!o.fortuneBusy,!o.companion.chatBusy,!self.walking else{return}
             
             self.activity="刚读完一段，想与你分享";self.lastChange=Date();o.animate("happy",seconds:2)
             o.petView.say("刚读到有趣的一段。点这段字幕，听听我的感想吧。",seconds:120,readingHash:d["evidenceHash"] as? String)

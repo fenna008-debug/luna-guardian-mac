@@ -5,3 +5,7 @@
 - Deep Agents：https://github.com/langchain-ai/deepagents — 参考将复杂工具任务与普通对话区分的方向；本项目不依赖其框架。
 
 上述项目是架构参考，不意味着本项目实现了它们全部能力，也没有将其代码或许可证套用到第三方角色素材。
+
+本次参考：
+- AAAAGENT：https://github.com/phoiex/AAAAGENT — 借鉴来源可追踪的记忆、过期回应失效和执行状态分离思路；本次实现为本项目 Swift/Python 代码，没有引入其运行时或复制其代码。该项目使用非商业及署名许可，不能按 MIT 项目对待。
+- luna-sama：https://github.com/annali07/luna-sama — 参考自然简短的角色台词和本地日语语音方向；保留现有语音流程，不上传模型权重。
