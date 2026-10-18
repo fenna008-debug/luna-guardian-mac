@@ -4,6 +4,13 @@ import computer_status as status
 import worker
 
 class ComputerStatusTests(unittest.TestCase):
+    def setUp(self):
+        import tempfile,sys
+        from pathlib import Path
+        sys.path.insert(0,str(Path(__file__).resolve().parents[2]/'src'))
+        import backend
+        self.temp=tempfile.TemporaryDirectory();self.base_patch=patch.object(backend,'BASE',Path(self.temp.name));self.base_patch.start()
+    def tearDown(self):self.base_patch.stop();self.temp.cleanup()
     def test_natural_requests(self):
         for text in ['你看看电脑状况','帮我检查一下电脑状态','电脑怎么这么卡','看看内存占用','Mac现在怎么样']:
             self.assertTrue(status.requested(text), text)

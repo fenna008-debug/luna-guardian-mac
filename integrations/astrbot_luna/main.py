@@ -25,6 +25,7 @@ class LunaBridge(Star):
         self.state_path = StarTools.get_data_dir("luna_mac_bridge") / "owner.json"
         self.lock = asyncio.Lock()
         self.last_voice = 0.0
+        self.work_watchers = set()
 
     @filter.event_message_type(filter.EventMessageType.ALL, priority=10000)
     async def incoming(self, event: AstrMessageEvent):
@@ -133,10 +134,13 @@ class LunaBridge(Star):
                 result = (
                     {"answer": "贵安。我是露娜，这是我的语音测试。"}
                     if voice_test
-                    else await self.run_worker("worker.py", {"message": message}, 65)
+                    else await self.run_worker("worker.py", {"message": message, "request_id": (platform + ":" + str(getattr(getattr(event, "message_obj", None), "message_id", ""))) if getattr(getattr(event, "message_obj", None), "message_id", "") else ""}, 65)
                 )
                 answer = str(result.get("answer", "暂时没有收到回复，请稍后再试。"))
                 await event.send(event.plain_result(answer[:3500]))
+                if result.get('watch_job'):
+                    task=asyncio.create_task(self.watch_work(event,result['watch_job']))
+                    self.work_watchers.add(task);task.add_done_callback(self.work_watchers.discard)
                 if "导出" in message or "发成文件" in message or len(answer) > 3500:
                     report = job / "露娜回复.txt"
                     report.write_text(answer, encoding="utf-8")
@@ -184,12 +188,28 @@ class LunaBridge(Star):
             except (ValueError, OSError, asyncio.TimeoutError):
                 await event.send(
                     event.plain_result(
-                        "这次处理暂未完成。请检查附件格式，或稍后再试；没有转交 Codex。"
+                        "这次处理暂未完成。可以稍后再问我；如果刚才交代了任务，请先查询进度。"
                     )
                 )
             finally:
                 shutil.rmtree(job, ignore_errors=True)
                 event.stop_event()
+
+    async def watch_work(self,event,job_id):
+        # Independent of the incoming lock: new messages and cancellation still work.
+        try:
+            for _ in range(210):
+                await asyncio.sleep(3)
+                result=await self.run_worker('worker.py',{'operation':'taskResult','job_id':job_id},10)
+                if result.get('state') in ('completed','failed','cancelled'):
+                    text=('你交代的事有结果了：\n' if result['state']=='completed' else '这件事暂时没办成：\n')+str(result.get('answer','没有取得结果'))
+                    if len(text)>3400:text=text[:3300]+'\n完整结果可以对我说“Codex结果，发成文件”。'
+                    await event.send(event.plain_result(text))
+                    return
+                if result.get('error'):return
+        except Exception:
+            # Never replay an uncertain network send; the result remains queryable.
+            return
 
     async def run_worker(self, script, payload, timeout):
         process = await asyncio.create_subprocess_exec(

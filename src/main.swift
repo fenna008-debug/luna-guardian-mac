@@ -253,7 +253,7 @@ final class Guardian:NSObject,NSApplicationDelegate,CLLocationManagerDelegate,AV
             ("日常陪伴",[("看看天气","weather"),("抽一支签","fortune"),("一起吃点东西","eat"),("专注 25 分钟","focusStart"),("结束专注","focusStop"),("自主生活","world")]),
             ("读书与任务",[("读书手记与留言","readingNotebook"),("长期记忆","memoryNotebook"),("任务清单","taskNotebook"),("文字与学习工具","tools")]),
             ("电脑照看",[("电脑状态","care"),("照看红线","guardSettings")]),
-            ("模型与联网",[("LLM 服务与模型","openModelSettings"),("复杂任务交给 Codex","codex"),("打开 Tailscale","openTailscale")]),
+            ("模型与联网",[("LLM 服务与模型","openModelSettings"),("交代一件事","codex"),("打开 Tailscale","openTailscale")]),
             ("外观与语音",[("放大一点","larger"),("标准大小","standard"),("缩小一点","smaller"),("气泡更通透","glassLight"),("气泡更清晰","glassClear"),(muted ? "打开语音":"静音","toggleMute")]),
             ("系统设置",[(studyEnabled ? "暂停屏幕陪伴":"开启屏幕陪伴","toggleStudy"),("跟随当前窗口","followStudy"),("只看刚才的应用","bindStudy"),("日常提醒设置","routineSettings"),("使用系统定位","startLocation"),("暂停定位","stopLocation"),("固定大阪东淀川区","fixedLocation"),("切换开机启动","toggleLogin")])
         ] {let sub=NSMenu();for pair in items{add(pair.0,pair.1,to:sub)};let item=NSMenuItem(title:title,action:nil,keyEquivalent:"");item.submenu=sub;m.addItem(item)}
@@ -377,18 +377,19 @@ final class Guardian:NSObject,NSApplicationDelegate,CLLocationManagerDelegate,AV
         guard Date().timeIntervalSince(lastHandoffPoll)>5 else{return};lastHandoffPoll=Date()
         let d=readJSON("codex-status.json"),id=d["id"] as? String ?? "",state=d["state"] as? String ?? ""
         guard !id.isEmpty else{return};let token=id+state+(d["summary"] as? String ?? "");guard token != lastHandoffToken else{return};lastHandoffToken=token
-        let title="Codex 后台任务",seconds=Date().timeIntervalSince1970-(d["started"] as? Double ?? d["created"] as? Double ?? Date().timeIntervalSince1970)
-        if ["queued","running"].contains(state){taskCard("codex-"+id,title,"进行中",seconds);companion.hint.stringValue=d["summary"] as? String ?? "Codex 正在处理"}
+        let title="你交代的事",seconds=Date().timeIntervalSince1970-(d["started"] as? Double ?? d["created"] as? Double ?? Date().timeIntervalSince1970)
+        if ["queued","running"].contains(state){taskCard("codex-"+id,title,"进行中",seconds);companion.hint.stringValue="我正在跟进这件事 · 你可以继续和我聊"}
         else{visibleTaskID="codex-"+id;taskCard("codex-"+id,title,state=="completed" ? "已完成":state=="cancelled" ? "已取消":"未完成",seconds)}
         if ["completed","failed","cancelled"].contains(state),UserDefaults.standard.string(forKey:"lastHandoffDelivered") != id+state{
             UserDefaults.standard.set(id+state,forKey:"lastHandoffDelivered")
             let summary=d["summary"] as? String ?? "没有收到结果"
-            if !companion.messages.contains(summary){companion.messages+="露娜\nCodex \(state=="completed" ? "已返回结果":"未完成")：\n\(summary)\n\n"}
+            if !companion.messages.contains(summary){companion.messages+="露娜\n\(state=="completed" ? "你交代的事有结果了":"这件事还没有完成")：\n\(summary)\n\n"}
             if companion.isViewLoaded && !companion.chatBusy{companion.showChat()}
-            petView.say(state=="completed" ? "Codex把结果带回来了。点我就能看。":"Codex这次没能完成。点我查看原因。",seconds:14)
+            petView.say(state=="completed" ? "你交代的事有结果了，点我看看。":"这件事暂时没办成，点我看看原因。",seconds:14)
         }
     }
-    func routeCodex(_ prompt:String){if !popover.isShown{showDashboard()};if prompt.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty{companion.showCodex()}else{companion.submitCodex(prompt)}}
+    func routeCodex(_ prompt:String){if !popover.isShown{showDashboard()};companion.showChat();if prompt.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty{companion.input.placeholderString="直接告诉我想做什么…"}else{companion.input.stringValue="交给Codex："+prompt;companion.submit()}}
+
     func tickFocus(){pollHandoff();guard let end=focusEnd else{return};let n=max(0,Int(end.timeIntervalSinceNow));event("focus",["time":String(format:"%02d:%02d",n/60,n%60),"text":n>0 ? "露娜正在陪你专心。":"这一轮完成了，休息一下吧。"]);if n==0{focusEnd=nil;animate("happy",text:"这一轮完成了。做得不错，起来活动一下吧。",seconds:10)}}
     func settings(){event("settings",["muted":muted,"watch":watching,"login":fm.fileExists(atPath:loginPath.path)])}
     var loginPath:URL{fm.homeDirectoryForCurrentUser.appendingPathComponent("Library/LaunchAgents/local.luna.lunaguardian.plist")}

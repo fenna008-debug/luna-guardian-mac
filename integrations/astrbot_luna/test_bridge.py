@@ -143,3 +143,22 @@ class BridgeTests(unittest.IsolatedAsyncioTestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+class WorkReceiptTests(BridgeTests):
+    async def test_completion_returns_to_same_conversation(self):
+        e=Event('任务')
+        self.bridge.run_worker=AsyncMock(return_value={'state':'completed','answer':'已生成文件'})
+        with patch.object(self.module.asyncio,'sleep',AsyncMock()):
+            await self.bridge.watch_work(e,'a'*32)
+        self.assertEqual(e.sent,['你交代的事有结果了：\n已生成文件'])
+    async def test_uncertain_send_not_replayed(self):
+        e=Event('任务');e.send=AsyncMock(side_effect=OSError('network'))
+        self.bridge.run_worker=AsyncMock(return_value={'state':'completed','answer':'完成'})
+        with patch.object(self.module.asyncio,'sleep',AsyncMock()):
+            await self.bridge.watch_work(e,'a'*32)
+        self.assertEqual(e.send.call_count,1)
+    async def test_nonowner_never_dispatches_work(self):
+        await self.bridge.incoming(Event('pair-test'))
+        self.bridge.run_worker=AsyncMock()
+        await self.bridge.incoming(Event('这个交给Codex干',sender='other',kind='qq_official'))
+        self.bridge.run_worker.assert_not_called()

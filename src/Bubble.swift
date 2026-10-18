@@ -8,8 +8,8 @@ final class LunaCard:NSVisualEffectView {
 }
 final class CompanionBubble:NSViewController {
     weak var owner:Guardian?
-    let transcript=NSTextView(),scroll=NSScrollView(),input=NSTextField(),hint=NSTextField(labelWithString:"日常 LLM · 复杂任务按需交接 Codex")
-    let observationStatus=NSButton(title:"观察：等待检查",target:nil,action:nil),taskStatus=NSButton(title:"任务：暂无执行",target:nil,action:nil)
+    let transcript=NSTextView(),scroll=NSScrollView(),input=NSTextField(),hint=NSTextField(labelWithString:"我在这里 · 有事直接和我说")
+    let observationStatus=NSButton(title:"观察：等待检查",target:nil,action:nil)
     var chatRequest=UUID()
     let fortuneBanner=NSTextField(wrappingLabelWithString:"")
     let send=NSButton(title:"发送",target:nil,action:nil)
@@ -19,27 +19,25 @@ final class CompanionBubble:NSViewController {
     override func loadView(){
         if let data=try? Data(contentsOf:support.appendingPathComponent("chat.json")),let rows=(try? JSONSerialization.jsonObject(with:data)) as? [[String:String]],!rows.isEmpty{messages=rows.suffix(20).map{($0["role"]=="user" ? "你":"露娜")+"\n"+($0["text"] ?? "")+"\n\n"}.joined()}
         let handoff=readJSON("codex-status.json")
-        if let state=handoff["state"] as? String,["completed","failed","cancelled"].contains(state),let summary=handoff["summary"] as? String,!messages.contains(summary){messages+="露娜\nCodex \(state=="completed" ? "已返回结果":"未完成")：\n\(summary)\n\n"}
+        if let state=handoff["state"] as? String,["completed","failed","cancelled"].contains(state),let summary=handoff["summary"] as? String,!messages.contains(summary){messages+="露娜\n\(state=="completed" ? "你交代的事有结果了":"这件事还没有完成")：\n\(summary)\n\n"}
         let root=LunaCard(frame:NSRect(x:0,y:0,width:340,height:380));view=root
         let title=NSTextField(labelWithString:"☾  L U N A");title.font = .systemFont(ofSize:12,weight:.medium);title.textColor=NSColor.white.withAlphaComponent(0.85);title.frame=NSRect(x:18,y:350,width:200,height:18);root.addSubview(title)
         let close=LunaChip(title:"×",target:self,action:#selector(collapse));close.isBordered=false;close.frame=NSRect(x:302,y:346,width:24,height:26);root.addSubview(close)
         hint.font = .systemFont(ofSize:10);hint.textColor=NSColor.white.withAlphaComponent(0.5);hint.frame=NSRect(x:18,y:330,width:305,height:16);root.addSubview(hint)
         fortuneBanner.font = .systemFont(ofSize:11,weight:.medium);fortuneBanner.textColor=NSColor(calibratedRed:0.93,green:0.83,blue:0.61,alpha:1);fortuneBanner.frame=NSRect(x:18,y:281,width:304,height:44);fortuneBanner.maximumNumberOfLines=2;root.addSubview(fortuneBanner);refreshFortuneBanner()
-        scroll.frame=NSRect(x:12,y:163,width:316,height:112);scroll.hasVerticalScroller=true;scroll.scrollerStyle = .overlay;scroll.borderType = .noBorder;scroll.drawsBackground=false;root.addSubview(scroll)
+        scroll.frame=NSRect(x:12,y:115,width:316,height:160);scroll.hasVerticalScroller=true;scroll.scrollerStyle = .overlay;scroll.borderType = .noBorder;scroll.drawsBackground=false;root.addSubview(scroll)
         transcript.isEditable=false;transcript.isSelectable=true;transcript.isRichText=false;transcript.font = .systemFont(ofSize:13);transcript.textColor=NSColor.white.withAlphaComponent(0.9);transcript.drawsBackground=false;transcript.textContainerInset=NSSize(width:6,height:8);transcript.autoresizingMask = [.width];transcript.isVerticallyResizable=true;transcript.isHorizontallyResizable=false;transcript.textContainer?.widthTracksTextView=true;transcript.frame=NSRect(x:0,y:0,width:300,height:160);scroll.documentView=transcript;render(messages)
         let line=NSBox(frame:NSRect(x:18,y:76,width:304,height:1));line.boxType = .separator;line.alphaValue=0.25;root.addSubview(line)
         input.frame=NSRect(x:18,y:40,width:262,height:27);input.placeholderString="和我说说…";input.isBordered=false;input.drawsBackground=false;input.focusRingType = .none;input.textColor = .white;input.font = .systemFont(ofSize:13);input.target=self;input.action=#selector(submit);root.addSubview(input)
         send.title="↑";send.frame=NSRect(x:290,y:39,width:32,height:28);send.isBordered=false;send.contentTintColor=NSColor(calibratedRed:0.82,green:0.75,blue:0.96,alpha:1);send.target=self;send.action=#selector(submit);root.addSubview(send)
-        for (i,pair) in [("对话","chat"),("手记","notebook"),("抽签","fortune"),("Codex任务","codex")].enumerated(){let b=LunaChip(title:pair.0,target:self,action:#selector(shortcut(_:)));b.identifier=NSUserInterfaceItemIdentifier(pair.1);b.isBordered=false;b.frame=NSRect(x:12+i*64,y:7,width:62,height:25);root.addSubview(b)}
-        observationStatus.frame=NSRect(x:18,y:139,width:304,height:22);observationStatus.font = .systemFont(ofSize:10);observationStatus.isBordered=false;observationStatus.alignment = .left;observationStatus.target=self;observationStatus.action=#selector(showObservation);root.addSubview(observationStatus)
-        taskStatus.frame=NSRect(x:18,y:91,width:304,height:43);taskStatus.font = .systemFont(ofSize:11);taskStatus.title="任务：暂无执行\n点击查看执行记录";taskStatus.cell?.wraps=true;taskStatus.target=self;taskStatus.action=#selector(showTasks);root.addSubview(taskStatus)
+        for (i,pair) in [("对话","chat"),("手记","notebook"),("抽签","fortune")].enumerated(){let b=LunaChip(title:pair.0,target:self,action:#selector(shortcut(_:)));b.identifier=NSUserInterfaceItemIdentifier(pair.1);b.isBordered=false;b.frame=NSRect(x:12+i*64,y:7,width:62,height:25);root.addSubview(b)}
+        observationStatus.frame=NSRect(x:18,y:87,width:304,height:22);observationStatus.font = .systemFont(ofSize:10);observationStatus.isBordered=false;observationStatus.alignment = .left;observationStatus.target=self;observationStatus.action=#selector(showObservation);root.addSubview(observationStatus)
         let stop=NSButton(title:"停止",target:self,action:#selector(cancelReply));stop.frame=NSRect(x:244,y:345,width:50,height:24);stop.isBordered=false;root.addSubview(stop)
         let prior=readJSON("screen-observation.json");observationStatus.title="观察："+(prior["status"] as? String ?? "等待检查")
         slider=NSSlider(value:Double(owner?.petSize ?? 220),minValue:140,maxValue:360,target:self,action:#selector(resize(_:)));slider.isContinuous=true
         let tools=LunaChip(title:"更多",target:self,action:#selector(more(_:)));tools.isBordered=false;tools.frame=NSRect(x:286,y:7,width:40,height:25);root.addSubview(tools)
     }
     @objc func showObservation(){let d=readJSON("screen-observation.json");let stamp=DateFormatter.localizedString(from:Date(timeIntervalSince1970:d["at"] as? Double ?? 0),dateStyle:.none,timeStyle:.short);text("最近检查："+stamp+"\n"+(d["app"] as? String ?? "")+"\n"+(d["status"] as? String ?? "等待检查")+"\n\n"+(d["text"] as? String ?? ""),title:"窗口观察状态")}
-    @objc func showTasks(){owner?.showNotebook(3)}
     @objc func cancelReply(){owner?.nativeCall("codexCancel"){[weak self] r in if let d=r["data"] as? [String:Any],d["requested"] as? Bool==true{self?.hint.stringValue="正在停止 Codex 任务…"}};chatRequest=UUID();owner?.cancelCurrentTurn();chatBusy=false;waitTimer?.invalidate();send.isEnabled=true;hint.stringValue="已停止当前回应"}
     func refreshFortuneBanner(){
         let saved=readJSON("fortune.json")
@@ -54,7 +52,7 @@ final class CompanionBubble:NSViewController {
     @objc func more(_ sender:NSButton){owner?.makeMenu().popUp(positioning:nil,at:NSPoint(x:sender.frame.minX,y:sender.frame.minY),in:view)}
     func updateSurface(){
         guard isViewLoaded,let card=view as? LunaCard else{return}
-        let chat=mode=="chat" || mode.hasPrefix("日常 LLM")
+        let chat=mode=="chat" || mode.hasPrefix("露娜 ·")
         card.solid = !chat;card.state = chat ? .active:.inactive;card.needsDisplay=true
         let saved=UserDefaults.standard.double(forKey:"glassAlpha")
         owner?.popover.alphaValue=chat ? (saved>0 ? saved:0.90):1
@@ -67,11 +65,9 @@ final class CompanionBubble:NSViewController {
         for name in ["露娜", "你", "连接提示"] {let pattern="(?m)^"+name+"$";if let regex=try? NSRegularExpression(pattern:pattern){for match in regex.matches(in:value,range:NSRange(location:0,length:ns.length)){a.addAttributes([.font:NSFont.systemFont(ofSize:11,weight:.semibold),.foregroundColor:NSColor(calibratedRed:0.81,green:0.73,blue:0.95,alpha:1)],range:match.range)}}}
         transcript.textStorage?.setAttributedString(a)
     }
-    func showCodex(){text("写下要交给 Codex 的任务，回车直接提交。\n后台执行，结果会回到这里；无需打开 Codex 界面。\n当前任务可生成文件；修改原文件受执行权限限制。",title:"Codex · 后台任务");mode="codex";input.placeholderString="输入任务，回车交给 Codex…";view.window?.makeFirstResponder(input)}
-    func submitCodex(_ message:String){messages+="你\n"+message+"\n\n";showChat();hint.stringValue="正在交给 Codex…";owner?.nativeCall("codexSubmit",["message":message]){[weak self] r in guard let self=self else{return};let d=r["data"] as? [String:Any] ?? [:];if r["ok"] as? Bool != true{self.input.stringValue=message};self.messages+="露娜\n"+(d["answer"] as? String ?? r["error"] as? String ?? "提交未成功")+"\n\n";self.showChat()}}
-    func showChat(){input.placeholderString="和我说说…";text(messages,title:"日常 LLM · 回车发送");mode="chat";transcript.scrollToEndOfDocument(nil)}
+    func showChat(){input.placeholderString="和我说说…";text(messages,title:"露娜 · 回车发送");mode="chat";transcript.scrollToEndOfDocument(nil)}
     @objc func shortcut(_ sender:NSButton){let action=sender.identifier?.rawValue ?? "chat";if action=="chat"{showChat()}else{perform(action)}}
-    @objc func submit(){let s=input.stringValue.trimmingCharacters(in:.whitespacesAndNewlines);guard !s.isEmpty else{return};input.stringValue="";if mode=="codex"{submitCodex(s);return};let commands=["天气":"weather","抽签":"fortune","扫描":"scan","清理":"scan","专注":"focusStart","停止专注":"focusStop","系统状态":"metrics","保护状态":"security","恢复":"restore","codex":"codex","语音测试":"voiceTest"]
+    @objc func submit(){let s=input.stringValue.trimmingCharacters(in:.whitespacesAndNewlines);guard !s.isEmpty else{return};input.stringValue="";let commands=["天气":"weather","抽签":"fortune","扫描":"scan","清理":"scan","专注":"focusStart","停止专注":"focusStop","系统状态":"metrics","保护状态":"security","恢复":"restore","codex":"codex","语音测试":"voiceTest"]
         if let command=commands[s.lowercased()]{perform(command);return};chatBusy=true;chatRequest=UUID();let request=chatRequest;send.isEnabled=true;messages+="你\n\(s)\n\n";showChat();hint.stringValue="露娜正在想…";requestStarted=Date();waitTimer?.invalidate();waitTimer=Timer.scheduledTimer(withTimeInterval:1,repeats:true){[weak self]_ in guard let self=self,self.chatBusy else{return};let seconds=Int(Date().timeIntervalSince(self.requestStarted));self.hint.stringValue=seconds<15 ? "露娜正在想 · \(seconds)秒":"等待服务回复 · \(seconds)秒 · 超时会提示"}
         owner?.nativeCall("chat",["message":s]){[weak self] r in guard let self=self,self.chatRequest==request else{return};self.chatBusy=false;self.waitTimer?.invalidate();self.send.isEnabled=true;if let d=r["data"] as? [String:Any],let answer=d["answer"] as? String{self.messages+="露娜\n\(answer)\n\n"}else{self.messages+="连接提示\n\(r["error"] as? String ?? "未收到回复")\n\n";self.input.stringValue=s};if self.messages.count>24000{self.messages=String(self.messages.suffix(18000))};self.showChat()}
     }
@@ -111,5 +107,5 @@ final class CompanionBubble:NSViewController {
     func showWeather(_ d:[String:Any]){guard let c=d["current"] as? [String:Any] else{return};let names=["rain":"下雨 ☂","snow":"降雪 ❄","storm":"雷雨 ⚡","hot":"高温","cold":"寒冷","sunny":(c["is_day"] as? Int==0 ? "晴夜 ☾":"晴天 ☀"),"cloudy":"多云 ☁"];let state=d["state"] as? String ?? "cloudy";text("\(d["city"] ?? "当前位置")\n\n\(c["temperature_2m"] ?? "—")°C · \(names[state] ?? state)\n体感 \(c["apparent_temperature"] ?? "—")°C\n风速 \(c["wind_speed_10m"] ?? "—") km/h\n\n\(c["time"] ?? "")\nOpen-Meteo 模型估计，非官方预警。",title:"天气")}
     func showFiles(_ d:[String:Any]){mode="files";updateSurface();let files=d["files"] as? [[String:Any]] ?? [];let bytes=d["bytes"] as? Double ?? 0;hint.stringValue=String(format:"旧缓存候选 %d 项 · %.1f MB · 先勾选",files.count,bytes/1e6);choices=[];let height=max(198,files.prefix(80).count*44+65);let list=NSView(frame:NSRect(x:0,y:0,width:315,height:height));for (i,f) in files.prefix(80).enumerated(){let path=f["path"] as? String ?? "";let title=URL(fileURLWithPath:path).lastPathComponent;let b=NSButton(checkboxWithTitle:String(title.prefix(30)),target:nil,action:nil);b.frame=NSRect(x:5,y:height-45-i*44,width:300,height:24);b.identifier=NSUserInterfaceItemIdentifier(f["id"] as? String ?? "");b.toolTip=path;b.font = .systemFont(ofSize:11);list.addSubview(b);choices.append(b)};let move=NSButton(title:"将选中项移入恢复区",target:self,action:#selector(moveFiles));move.frame=NSRect(x:30,y:12,width:250,height:30);move.bezelStyle = .rounded;list.addSubview(move);scroll.documentView=list;scroll.contentView.scroll(to:NSPoint(x:0,y:CGFloat(height)-scroll.contentSize.height));input.isHidden=true;send.isHidden=true;if files.isEmpty{text("没有找到符合条件的旧文件。\n不为了清理而随便删除。",title:"扫描完成")}}
     @objc func moveFiles(){let ids=choices.filter{$0.state == .on}.compactMap{$0.identifier?.rawValue};guard !ids.isEmpty else{hint.stringValue="先勾选要整理的项目，悬停可查看完整路径。";return};perform("clean",["ids":ids])}
-    func receive(_ kind:String,_ d:[String:Any]){guard isViewLoaded else{return};if kind=="focus",mode=="focus"{text((d["time"] as? String ?? "")+"\n\n"+(d["text"] as? String ?? ""),title:"专注计时");mode="focus"};if kind=="study"{observationStatus.title="观察："+(d["status"] as? String ?? "");observationStatus.toolTip=observationStatus.title};if kind=="task"{taskStatus.title=(d["tool"] as? String ?? "任务")+" · "+(d["outcome"] as? String ?? "")+"\n点击查看执行记录";taskStatus.toolTip=taskStatus.title};if kind=="location"{text(d["text"] as? String ?? "",title:"定位")};if kind=="toast"{hint.stringValue=d["text"] as? String ?? ""}}
+    func receive(_ kind:String,_ d:[String:Any]){guard isViewLoaded else{return};if kind=="focus",mode=="focus"{text((d["time"] as? String ?? "")+"\n\n"+(d["text"] as? String ?? ""),title:"专注计时");mode="focus"};if kind=="study"{observationStatus.title="观察："+(d["status"] as? String ?? "");observationStatus.toolTip=observationStatus.title};if kind=="location"{text(d["text"] as? String ?? "",title:"定位")};if kind=="toast"{hint.stringValue=d["text"] as? String ?? ""}}
 }

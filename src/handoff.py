@@ -42,7 +42,7 @@ def submit(base,message,reason):
    try:subprocess.Popen([sys.executable,str(Path(__file__).resolve()),'run',str(base),job.name],stdin=subprocess.DEVNULL,stdout=log,stderr=log,start_new_session=True)
    except OSError:
     status.update(state='failed',summary='后台执行器未能启动');write(base/'codex-status.json',status);raise
- return {'answer':'这件事需要实际操作，我已经交给 Codex：'+reason+'。完成后我会把结果带回来。','handoff':status}
+ return {'answer':'这件事我已经交给 Codex 去做了。你继续忙，我拿到结果就告诉你。','handoff':status}
 
 def run(base,jobid):
  job=base/'codex-jobs'/jobid;s=read(job/'request.json',{});s.update(state='running',started=time.time(),summary='Codex正在处理');write(base/'codex-status.json',s)

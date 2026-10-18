@@ -10,7 +10,7 @@ Tested with AstrBot v4.29.1 on Apple Silicon. Supports the official QQ WebSocket
 - Send audio up to two minutes for local Whisper recognition. Recognition may contain errors. Requests containing “语音”, “念给我” or “说给我听” request a short Japanese Luna voice reply with Chinese captions. Voice generation needs the existing local Luna GPT-SoVITS installation. “测试露娜语音” uses a fixed, clearly identified test sentence to diagnose transport independently of the LLM.
 - “发成文件” exports a reply. Voice jobs are serialized, rate-limited to one per minute, and stop at critical memory pressure or the process budget. Models are unloaded when the worker exits.
 
-Long-term memories/tasks share the desktop SQLite notebook. Recent remote context is separate. Owner-paired requests such as “看看电脑状况” now perform a fresh read-only CPU, memory-pressure, disk, battery and process snapshot without asking the LLM to invent status. No remote modifying operations or Codex invocation are exposed by this bridge.
+Long-term memories/tasks share the desktop SQLite notebook. Recent remote context is separate. Owner-paired requests such as “看看电脑状况” now perform a fresh read-only CPU, memory-pressure, disk, battery and process snapshot without asking the LLM to invent status. Paired private chat also supports memory edits/deletion, todo completion/reopening, public search, today’s existing fortune and reading records. Natural requests can delegate bounded work to Codex, query progress/results or cancel the same remote job. Referential requests use remote-channel context only. Codex writes remain limited to the job workspace with a ten-minute limit.
 
 ## Installation and boundaries
 
@@ -22,7 +22,7 @@ Create an independent QQ official bot through AstrBot's QR flow. The account own
 
 ## Verification and limitations
 
-Real QQ text reply, audio attachment reception/transcription, and outgoing text-file transport were observed. A freshly synthesized four-second Japanese test reply and matching Chinese captions arrived in the real QQ conversation. General model calls have intermittent timeouts; a successful fixed voice test alone does not prove arbitrary model-generated speech. File fallback has a local integration check. Seventeen offline tests cover owner access, delivery, source restrictions and document parsing.
+Real QQ text reply, audio attachment reception/transcription, and outgoing text-file transport were observed. A freshly synthesized four-second Japanese test reply and matching Chinese captions arrived in the real QQ conversation. General model calls have intermittent timeouts; a successful fixed voice test alone does not prove arbitrary model-generated speech. File fallback has a local integration check. Thirty-seven offline tests cover owner access, delivery, source restrictions, document parsing, remote actions, duplicate suppression, cancellation isolation and result callbacks. The latest natural delegation was tested with a real local Codex job and result readback. New completion callbacks were tested with mock events, not a new live QQ outbound delivery. A failed callback is not retried blindly; the owner can ask for the result.
 
 Run `python -m unittest discover -s integrations/astrbot_luna -p 'test_*.py'` using the dedicated environment.
 
